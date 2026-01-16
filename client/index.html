@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 
 <body>
@@ -47,8 +48,21 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Modules Actifs</div>
-                        <div class="stat-value">9 Outils</div>
+                        <div class="stat-value">11 Outils</div>
                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OUTIL QR CODE -->
+        <section id="view-qrcode" class="view-section">
+            <h2>Générateur QR Code</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Générez un QR Code localement (hors ligne) pour vos liens ou textes.</p>
+                <input type="text" id="qr-input" placeholder="https://exemple.com ou Texte...">
+                <button class="action-btn" onclick="tools.qrcode.run()">GÉNÉRER QR CODE</button>
+                <div id="qr-result" class="result-box"
+                    style="display:none; text-align:center; background:#fff; padding:20px; width:fit-content; margin: 20px auto;">
                 </div>
             </div>
         </section>
@@ -114,24 +128,36 @@
             </div>
         </section>
 
-        <!-- OUTIL 5: COMPRESSOR -->
+        <!-- OUTIL 9: COMPRESSION FICHIER -->
         <section id="view-compress" class="view-section">
-            <h2>Compression Sécurisée</h2>
+            <h2>Compression Fichier</h2>
             <div class="panel">
-                <p style="margin-bottom: 1rem;">Réduction de la taille des images localement (sans envoi serveur).</p>
-                <input type="file" id="compress-file" accept="image/*">
-                <button class="action-btn" style="margin-top: 0.5rem;" onclick="tools.compress.run()">LANCER LA
-                    COMPRESSION</button>
+                <p>Réduisez la taille de vos images sans perte visible de qualité (Local execution).</p>
+
+                <label class="file-drop-zone" id="compress-drop">
+                    <span class="file-icon">⚡</span>
+                    <div style="font-weight:700; color:#ddd;">CLIQUEZ POUR SÉLECTIONNER UNE IMAGE</div>
+                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP</div>
+                    <input type="file" id="compress-file" accept="image/*" onchange="tools.compress.run()">
+                </label>
+
                 <div id="compress-result" class="result-box" style="display:none;"></div>
             </div>
         </section>
 
-        <!-- OUTIL 6: SCANNER -->
+        <!-- OUTIL 10: SCAN FICHIER -->
         <section id="view-scanner" class="view-section">
-            <h2>Contrôle d'Intégrité de Fichier</h2>
+            <h2>Contrôle d'Intégrité</h2>
             <div class="panel">
-                <p style="margin-bottom: 1rem;">Calcul d'empreinte SHA-256 locale et vérification VirusTotal.</p>
-                <input type="file" id="scan-file" onchange="tools.scanner.run(this)">
+                <p>Calcul d'empreinte SHA-256 et vérification VirusTotal.</p>
+
+                <label class="file-drop-zone">
+                    <span class="file-icon">🛡️</span>
+                    <div style="font-weight:700; color:#ddd;">ANALYSER UN FICHIER SUSPECT</div>
+                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">TOUT TYPE ACCEPTÉ</div>
+                    <input type="file" id="scan-file" onchange="tools.scanner.run(this)">
+                </label>
+
                 <div id="scan-result" class="result-box" style="display:none;"></div>
             </div>
         </section>
@@ -150,19 +176,70 @@
         </section>
 
         <!-- OUTIL 8: PASS -->
+        <!-- OUTIL 8: PASS -->
         <section id="view-pass" class="view-section">
             <h2>Gestion Mots de Passe</h2>
 
             <!-- Générateur -->
             <div class="panel" style="margin-bottom: 2rem;">
-                <h3>Générateur</h3>
-                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
-                    <label>Longueur : <input type="number" id="pass-len" value="20" min="8" max="64"
-                            style="width: 80px; display: inline-block;"></label>
+                <h3>Générateur de Clés</h3>
+
+                <!-- 1. Length Row -->
+                <!-- 1. Length Row (Compact Single Line) -->
+                <div style="display:flex; align-items:center; gap:15px; margin-bottom:1rem; margin-top:1.5rem;">
+                    <div style="font-weight:700; color:#ccc; font-size:0.85rem; white-space:nowrap; min-width:120px;">
+                        LONGUEUR : <span id="len-disp" style="color:#00ff80; font-size:1rem;">24</span>
+                    </div>
+                    <input type="range" id="pass-len-range" value="24" min="8" max="64"
+                        style="flex:1; width:auto; margin:0; cursor:pointer;"
+                        oninput="document.getElementById('pass-len').value = this.value; document.getElementById('len-disp').textContent = this.value">
+                    <input type="hidden" id="pass-len" value="24">
                 </div>
-                <button class="action-btn" onclick="tools.pass.run()">GÉNÉRER UN MOT DE PASSE FORT</button>
-                <div id="pass-result" class="result-box"
-                    style="font-size: 1.5rem; text-align: center; letter-spacing: 2px;"></div>
+
+                <!-- 2. Options Grid -->
+                <div class="cyber-options"
+                    style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:1.5rem;">
+                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                        <div class="check-indicator"></div>
+                        <input type="checkbox" id="pass-upper" checked> MAJUSCULES
+                    </label>
+                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                        <div class="check-indicator"></div>
+                        <input type="checkbox" id="pass-lower" checked> MINUSCULES
+                    </label>
+                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                        <div class="check-indicator"></div>
+                        <input type="checkbox" id="pass-nums" checked> CHIFFRES
+                    </label>
+                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                        <div class="check-indicator"></div>
+                        <input type="checkbox" id="pass-syms" checked> SYMBOLES
+                    </label>
+                </div>
+
+                <button class="action-btn" style="width:100%" onclick="tools.pass.run()">GÉNÉRER LA CLÉ</button>
+
+                <!-- Integrated Result Box -->
+                <!-- Integrated Result Box (Redesigned) -->
+                <!-- Integrated Result Box (Ultimate) -->
+                <div id="pass-result-box" style="display:none; margin-top:1.5rem; flex-direction:column; gap:5px;">
+                    <!-- Strength Badge -->
+                    <div style="text-align:right; margin-bottom:5px;">
+                        <span id="pass-gen-strength-label"
+                            style="font-size:0.75rem; font-weight:bold; letter-spacing:1px; background:#111; padding:3px 8px; border-radius:4px; border:1px solid #333;"></span>
+                    </div>
+
+                    <!-- Password Input-like Group -->
+                    <div style="position:relative;">
+                        <div id="pass-result-text"
+                            style="background:#050505; border:1px solid #333; color:#fff; font-family:'Courier New', monospace; font-size:1.1rem; padding:15px; padding-right:50px; border-radius:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                        </div>
+                        <button onclick="tools.pass.copy()"
+                            style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#00ff80; font-size:1.4rem; cursor:pointer; padding:5px; transition:all 0.2s; opacity:0.9;">
+                            ⎘
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Testeur -->
@@ -196,14 +273,15 @@
     <nav class="dock-container">
         <div class="dock-item active" onclick="app.navigate('dashboard')">ACCUEIL</div>
         <div class="dock-item" onclick="app.navigate('ip')">MON IP</div>
-        <div class="dock-item" onclick="app.navigate('whois')">INFO SITE</div>
-        <div class="dock-item" onclick="app.navigate('exif')">PHOTO CLEAN</div>
-        <div class="dock-item" onclick="app.navigate('sanitizer')">TEXTE CLEAN</div>
-        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION FICHIER</div>
-        <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
+        <div class="dock-item" onclick="app.navigate('whois')">WHOIS</div>
         <div class="dock-item" onclick="app.navigate('url')">TEST LIEN</div>
         <div class="dock-item" onclick="app.navigate('pass')">MOTS DE PASSE</div>
+        <div class="dock-item" onclick="app.navigate('qrcode')">QR CODE</div>
         <div class="dock-item" onclick="app.navigate('breach')">FUITE EMAIL</div>
+        <div class="dock-item" onclick="app.navigate('exif')">PHOTO CLEAN</div>
+        <div class="dock-item" onclick="app.navigate('sanitizer')">TEXTE CLEAN</div>
+        <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
+        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION FICHIER</div>
     </nav>
 
     <script type="module" src="main.js"></script>

@@ -42,29 +42,38 @@ const tools = {
     ip: {
         init: async () => {
             const container = document.getElementById('ip-results');
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse du réseau en cours...</div>';
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse directe de VOTRE connexion...</div>';
             try {
-                const res = await fetch(`${API_URL}/ip`);
+                // Fetch Client-Side to get User's IP directly
+                const res = await fetch('https://ipwho.is/');
                 const data = await res.json();
 
+                if (!data.success) throw new Error(data.message);
+
                 const fields = [
-                    { label: 'Adresse IP', value: data.query },
-                    { label: 'Fournisseur (ISP)', value: data.isp },
-                    { label: 'Organisation (ASN)', value: data.as },
+                    // Network Identity
+                    { label: 'VOTRE IP PUBLIQUE', value: data.ip },
+                    { label: 'Fournisseur (ISP)', value: data.connection.isp },
+                    { label: 'Organisation', value: data.connection.org },
                     { label: 'Localisation', value: `${data.city}, ${data.country}` },
-                    { label: 'Fuseau Horaire', value: data.timezone },
-                    { label: 'Coordonnées', value: `${data.lat}, ${data.lon}` }
+
+                    // Local Machine Identity
+                    { label: 'Système', value: navigator.platform },
+                    { label: 'Navigateur', value: navigator.userAgent.includes('Chrome') ? 'Chrome/Chromium' : 'Autre (Firefox/Safari)' },
                 ];
 
                 container.innerHTML = fields.map(f => `
-                    <div style="background:#000; padding:1.5rem; border:1px solid #333; border-radius:6px;">
+                    <div style="background:#000; padding:1.5rem; border:1px solid #333; border-radius:6px; position:relative;">
                         <div style="color:#888; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">${f.label}</div>
-                        <div style="font-size:1.1rem; color:#fff; font-weight:600;">${f.value || 'N/A'}</div>
+                        <div style="font-size:1.1rem; color:#fff; font-weight:600; word-break:break-all;">
+                            ${f.value || 'N/A'}
+                            ${f.copy ? `<button onclick="navigator.clipboard.writeText('${f.value}'); alert('IP Copiée !')" style="margin-left:10px; padding:4px 8px; font-size:0.7rem; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">COPIER</button>` : ''}
+                        </div>
                     </div>
                 `).join('');
 
             } catch (e) {
-                container.innerHTML = '<div style="color:red">Impossible de récupérer les données IP.</div>';
+                container.innerHTML = '<div style="color:red">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
             }
         }
     },
@@ -250,10 +259,63 @@ const tools = {
     pass: {
         run: () => {
             const len = document.getElementById('pass-len').value;
-            const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+';
+            const useUpper = document.getElementById('pass-upper').checked;
+            const useLower = document.getElementById('pass-lower').checked;
+            const useNums = document.getElementById('pass-nums').checked;
+            const useSyms = document.getElementById('pass-syms').checked;
+
+            let chars = '';
+            if (useUpper) chars += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            if (useLower) chars += 'abcdefghijklmnopqrstuvwxyz';
+            if (useNums) chars += '0123456789';
+            if (useSyms) chars += '!@#$%^&*()_+~`|}{[]:;?><,./-=';
+
+            if (chars === '') {
+                alert('Sélectionnez au moins une option !');
+                return;
+            }
+
             let res = '';
-            for (let i = 0; i < len; i++) res += chars.charAt(Math.floor(Math.random() * chars.length));
-            document.getElementById('pass-result').textContent = res;
+            for (let i = 0; i < len; i++) {
+                const randomVal = window.crypto.getRandomValues(new Uint32Array(1))[0];
+                res += chars.charAt(randomVal % chars.length);
+            }
+
+            // UI Updates
+            document.getElementById('pass-result-box').style.display = 'flex';
+            document.getElementById('pass-result-text').textContent = res;
+
+            // Strength
+            let score = 0;
+            if (res.length >= 12) score++;
+            if (useUpper && /[A-Z]/.test(res)) score++;
+            if (useLower && /[a-z]/.test(res)) score++;
+            if (useNums && /[0-9]/.test(res)) score++;
+            if (useSyms && /[^A-Za-z0-9]/.test(res)) score++;
+
+            let color = 'red';
+            let txt = 'FAIBLE';
+            if (score >= 4) { color = 'lime'; txt = 'EXCELLENT'; }
+            else if (score >= 3) { color = '#00ff80'; txt = 'FORT'; }
+            else if (score >= 2) { color = 'orange'; txt = 'MOYEN'; }
+
+            document.getElementById('pass-gen-strength-label').innerHTML = `<span style="color:${color}">SÉCURITÉ: ${txt}</span>`;
+        },
+        copy: () => {
+            const pwd = document.getElementById('pass-result-text').textContent;
+            if (pwd) {
+                navigator.clipboard.writeText(pwd);
+                // Feedback on button
+                const btn = document.querySelector('#pass-result-box button');
+                const original = btn.innerHTML;
+                btn.innerHTML = '✓';
+                btn.style.color = '#00ff80';
+                setTimeout(() => {
+                    btn.innerHTML = original;
+                    btn.style.borderColor = ''; // reset to stylesheet
+                    btn.style.color = '';
+                }, 2000);
+            }
         },
         check: () => {
             const val = document.getElementById('pass-test-input').value;
@@ -304,6 +366,26 @@ const tools = {
             } catch (e) {
                 resBox.textContent = 'Erreur lors de la vérification.';
             }
+        }
+    },
+
+    // 10. QR Code
+    qrcode: {
+        run: () => {
+            const txt = document.getElementById('qr-input').value;
+            const resBox = document.getElementById('qr-result');
+
+            if (!txt) return;
+
+            resBox.innerHTML = '';
+            resBox.style.display = 'block';
+
+            // Generate
+            new QRCode(resBox, {
+                text: txt,
+                width: 256,
+                height: 256
+            });
         }
     }
 };
