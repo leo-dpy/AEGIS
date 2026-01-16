@@ -231,7 +231,7 @@ const tools = {
         }
     },
 
-    // 7. URL Inspector
+    // 7. URL Inspector (VirusTotal powered)
     url: {
         run: async () => {
             const url = document.getElementById('url-input').value;
@@ -239,18 +239,70 @@ const tools = {
             if (!url) return;
 
             resBox.style.display = 'block';
-            resBox.textContent = 'Analyse de la chaîne de redirection...';
+            resBox.innerHTML = '<div style="text-align:center;">🔍 Analyse VirusTotal en cours...</div>';
 
             try {
                 const res = await fetch(`${API_URL}/url-info?url=${encodeURIComponent(url)}`);
                 const data = await res.json();
+
+                if (data.error) {
+                    resBox.innerHTML = `<span style="color:red">${data.error}</span>`;
+                    return;
+                }
+
+                // Build VirusTotal stats HTML
+                let vtHtml = '';
+                if (data.virusTotal) {
+                    const vt = data.virusTotal;
+                    vtHtml = `
+                        <div style="margin:15px 0; padding:15px; background:#111; border:1px solid #333; border-radius:8px;">
+                            <div style="color:#888; font-size:0.75rem; margin-bottom:10px;">ANALYSE VIRUSTOTAL (${vt.totalEngines} moteurs)</div>
+                            <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                                <div style="text-align:center;">
+                                    <div style="font-size:1.5rem; font-weight:bold; color:${vt.malicious > 0 ? 'red' : '#444'};">${vt.malicious}</div>
+                                    <div style="font-size:0.7rem; color:#888;">MALVEILLANT</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:1.5rem; font-weight:bold; color:${vt.suspicious > 0 ? 'orange' : '#444'};">${vt.suspicious}</div>
+                                    <div style="font-size:0.7rem; color:#888;">SUSPECT</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:1.5rem; font-weight:bold; color:lime;">${vt.harmless}</div>
+                                    <div style="font-size:0.7rem; color:#888;">SÛR</div>
+                                </div>
+                                <div style="text-align:center;">
+                                    <div style="font-size:1.5rem; font-weight:bold; color:#666;">${vt.undetected}</div>
+                                    <div style="font-size:0.7rem; color:#888;">NON TESTÉ</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Build warnings HTML
+                let warningsHtml = '';
+                if (data.warnings && data.warnings.length > 0) {
+                    warningsHtml = `<div style="margin-top:15px; padding:10px; background:rgba(255,100,0,0.1); border:1px solid rgba(255,100,0,0.3); border-radius:4px;">
+                        <div style="color:orange; font-weight:bold; margin-bottom:8px;">⚠️ ALERTES:</div>
+                        ${data.warnings.map(w => `<div style="color:#ccc; margin-left:10px;">• ${w}</div>`).join('')}
+                    </div>`;
+                }
+
                 resBox.innerHTML = `
-                    Status Code : <b>${data.statusCode}</b><br>
-                    URL Finale : <a href="${data.finalUrl}" target="_blank" style="color:#fff">${data.finalUrl}</a><br>
-                    Serveur : ${data.server}
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #333;">
+                        <span style="font-size:0.8rem; color:#888;">VERDICT</span>
+                        <span style="font-size:1.3rem; font-weight:bold; color:${data.riskColor}; text-shadow:0 0 10px ${data.riskColor};">${data.riskLevel}</span>
+                    </div>
+                    ${vtHtml}
+                    <div style="display:grid; gap:8px; font-size:0.9rem;">
+                        <div><span style="color:#666;">URL :</span> <span style="color:#fff;">${data.originalUrl}</span></div>
+                        <div><span style="color:#666;">Destination :</span> <a href="${data.finalUrl}" target="_blank" style="color:#00ff80;">${data.finalUrl}</a></div>
+                        <div><span style="color:#666;">Code HTTP :</span> <b style="color:${data.statusCode < 400 ? 'lime' : 'red'}">${data.statusCode}</b></div>
+                    </div>
+                    ${warningsHtml}
                 `;
             } catch (e) {
-                resBox.textContent = 'Erreur lors de l\'analyse de l\'URL';
+                resBox.innerHTML = '<span style="color:red">Erreur lors de l\'analyse de l\'URL</span>';
             }
         }
     },
@@ -271,7 +323,8 @@ const tools = {
             if (useSyms) chars += '!@#$%^&*()_+~`|}{[]:;?><,./-=';
 
             if (chars === '') {
-                alert('Sélectionnez au moins une option !');
+                document.getElementById('cyber-popup-msg').textContent = 'Impossible : Vous devez cocher au moins une option.';
+                document.getElementById('cyber-popup').style.display = 'flex';
                 return;
             }
 
@@ -393,3 +446,22 @@ const tools = {
 // Expose to window for HTML onclick handlers
 window.app = app;
 window.tools = tools;
+
+// Initialize Checkbox Listeners for Visual Feedback
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Checkboxes
+    document.querySelectorAll('.check-label input[type="checkbox"]').forEach(input => {
+        input.addEventListener('change', function () {
+            const label = this.closest('.check-label');
+            if (label) {
+                if (this.checked) label.classList.add('checked');
+                else label.classList.remove('checked');
+            }
+        });
+
+        // Safety Init
+        if (input.checked && input.closest('.check-label')) {
+            input.closest('.check-label').classList.add('checked');
+        }
+    });
+});

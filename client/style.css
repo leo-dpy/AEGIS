@@ -444,6 +444,16 @@ button.action-btn:active {
     padding: 0 5px;
 }
 
+/* Hide terminal output label for QR code */
+#qr-result::before {
+    display: none;
+}
+
+#qr-result {
+    border-left: none;
+    border-radius: 8px;
+}
+
 .result-header {
     display: flex;
     justify-content: flex-end;
@@ -583,9 +593,9 @@ input[type=range]:focus {
 }
 
 .check-label.checked {
-    border-color: #444;
-    color: #ddd;
-    background: #0f0f0f;
+    border-color: #00ff80;
+    color: #00ff80;
+    background: rgba(0, 255, 128, 0.05);
 }
 
 /* Hide the old indicator square if still in HTML, or style it as a tiny light */

@@ -21,10 +21,9 @@ app.use(express.json());
 // Serve Static Frontend
 app.use(express.static(path.join(__dirname, '../client')));
 
-// --- MOCK API KEYS (As requested) ---
+// --- API KEYS ---
 // In a real scenario, these would come from process.env
 const VIRUSTOTAL_API_KEY = process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key_12345';
-const HIBP_API_KEY = process.env.HIBP_API_KEY || 'mock_hibp_key_67890';
 
 // --- ROUTES ---
 
@@ -82,47 +81,206 @@ app.get('/api/virustotal/:hash', async (req, res) => {
     }
 });
 
-// 4. URL Reputation / Expansion
+// 4. URL Reputation Check via VirusTotal API
 app.get('/api/url-info', async (req, res) => {
-    const { url } = req.query;
+    let { url } = req.query;
     if (!url) return res.status(400).json({ error: 'URL is required' });
 
+    const originalUrl = url;
+
+    // Add https:// if no protocol specified
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        url = 'https://' + url;
+    }
+
     try {
-        const response = await axios.head(url, {
-            maxRedirects: 5,
-            validateStatus: () => true
-        });
+        // First, get basic URL info (redirects, status)
+        let finalUrl = url;
+        let statusCode = 200;
+        let server = 'Non spécifié';
+
+        try {
+            const headResponse = await axios.head(url, {
+                maxRedirects: 10,
+                validateStatus: () => true,
+                timeout: 8000
+            });
+            finalUrl = headResponse.request.res.responseUrl || url;
+            statusCode = headResponse.status;
+            server = headResponse.headers['server'] || 'Non spécifié';
+        } catch (e) {
+            // URL might be unreachable, continue with VT check anyway
+        }
+
+        // Encode URL for VirusTotal (base64 without padding)
+        const urlId = Buffer.from(url).toString('base64').replace(/=/g, '');
+
+        // Query VirusTotal URL report
+        let vtData = null;
+        let malicious = 0;
+        let suspicious = 0;
+        let harmless = 0;
+        let undetected = 0;
+
+        try {
+            const vtResponse = await axios.get(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+                headers: { 'x-apikey': VIRUSTOTAL_API_KEY },
+                timeout: 10000
+            });
+
+            vtData = vtResponse.data.data;
+            const stats = vtData.attributes.last_analysis_stats;
+            malicious = stats.malicious || 0;
+            suspicious = stats.suspicious || 0;
+            harmless = stats.harmless || 0;
+            undetected = stats.undetected || 0;
+        } catch (vtError) {
+            // URL not in VT database or API error - we'll submit it
+            if (vtError.response && vtError.response.status === 404) {
+                // URL not found, try to submit for scanning
+                try {
+                    await axios.post('https://www.virustotal.com/api/v3/urls',
+                        `url=${encodeURIComponent(url)}`,
+                        {
+                            headers: {
+                                'x-apikey': VIRUSTOTAL_API_KEY,
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            timeout: 10000
+                        }
+                    );
+                } catch (e) {
+                    // Submission failed, continue without VT data
+                }
+            }
+        }
+
+        // Calculate risk based on VirusTotal results
+        let riskScore = 0;
+        let riskLevel, riskColor;
+        const warnings = [];
+
+        if (vtData) {
+            // We have VirusTotal data
+            if (malicious > 0) {
+                riskScore = Math.min(100, malicious * 15);
+                warnings.push(`${malicious} moteur(s) de sécurité ont détecté cette URL comme malveillante`);
+            }
+            if (suspicious > 0) {
+                riskScore += suspicious * 10;
+                warnings.push(`${suspicious} moteur(s) considèrent cette URL comme suspecte`);
+            }
+
+            // Determine risk level based on VT results
+            if (malicious >= 3) {
+                riskLevel = 'DANGEREUX';
+                riskColor = 'red';
+            } else if (malicious >= 1 || suspicious >= 2) {
+                riskLevel = 'RISQUE ÉLEVÉ';
+                riskColor = 'orange';
+            } else if (suspicious >= 1) {
+                riskLevel = 'ATTENTION';
+                riskColor = 'yellow';
+            } else {
+                riskLevel = 'SÛR';
+                riskColor = 'lime';
+            }
+        } else {
+            // No VT data available
+            riskLevel = 'INCONNU';
+            riskColor = '#888';
+            warnings.push('URL non répertoriée dans la base VirusTotal (soumise pour analyse)');
+        }
+
+        // Check for HTTPS
+        if (finalUrl.startsWith('http://')) {
+            warnings.push('Connexion non sécurisée (HTTP)');
+            if (riskLevel === 'SÛR') {
+                riskLevel = 'ATTENTION';
+                riskColor = 'yellow';
+            }
+        }
 
         res.json({
-            finalUrl: response.request.res.responseUrl || url,
-            statusCode: response.status,
-            contentType: response.headers['content-type'],
-            server: response.headers['server']
+            originalUrl: originalUrl,
+            finalUrl: finalUrl,
+            statusCode: statusCode,
+            server: server,
+            // VirusTotal stats
+            virusTotal: vtData ? {
+                malicious: malicious,
+                suspicious: suspicious,
+                harmless: harmless,
+                undetected: undetected,
+                totalEngines: malicious + suspicious + harmless + undetected
+            } : null,
+            riskScore: riskScore,
+            riskLevel: riskLevel,
+            riskColor: riskColor,
+            warnings: warnings
         });
     } catch (error) {
-        res.status(500).json({ error: 'Failed to analyze URL' });
+        console.error('URL analysis error:', error.message);
+        res.status(500).json({ error: 'Impossible d\'analyser l\'URL' });
     }
 });
 
-// 5. HaveIBeenPwned Breach Check
+// 5. Email Breach Check (via multiple free APIs)
 app.get('/api/breach/:email', async (req, res) => {
     const { email } = req.params;
+
     try {
-        const response = await axios.get(`https://haveibeenpwned.com/api/v3/breachedaccount/${email}`, {
+        // Try XposedOrNot API first
+        const response = await axios.get(`https://api.xposedornot.com/v1/check-email/${email}`, {
+            timeout: 10000,
             headers: {
-                'hibp-api-key': HIBP_API_KEY,
-                'user-agent': 'AEGIS-Security-Tool'
+                'User-Agent': 'AEGIS Security Toolkit'
             }
         });
-        res.json(response.data);
-    } catch (error) {
-        if (error.response && error.response.status === 404) {
-            return res.json([]); // No breaches found
+
+        // Handle successful response
+        if (response.data && response.data.breaches) {
+            // New API format
+            const breaches = response.data.breaches;
+            if (Array.isArray(breaches) && breaches.length > 0) {
+                const formatted = breaches.map(b => ({
+                    Name: typeof b === 'string' ? b : (b.name || b.Name || 'Unknown'),
+                    Domain: b.domain || 'Unknown',
+                    BreachDate: b.date || b.BreachDate || 'Unknown',
+                    Description: 'Fuite détectée via XposedOrNot'
+                }));
+                return res.json(formatted);
+            }
         }
-        // Fallback mock
-        res.json([
-            { Name: "MockBreachDB", Domain: "mock.com", BreachDate: "2025-01-01", Description: "This is a simulated breach result." }
-        ]);
+
+        // Old API format with Breaches key
+        if (response.data && response.data.Breaches) {
+            const breachData = response.data.Breaches;
+            if (Array.isArray(breachData) && breachData.length > 0) {
+                // Handle nested array format
+                const flatBreaches = Array.isArray(breachData[0]) ? breachData[0] : breachData;
+                const formatted = flatBreaches.map(name => ({
+                    Name: typeof name === 'string' ? name : (name.Name || 'Unknown'),
+                    Domain: 'Unknown',
+                    BreachDate: 'Unknown',
+                    Description: 'Fuite détectée via XposedOrNot'
+                }));
+                return res.json(formatted);
+            }
+        }
+
+        // No breaches found
+        return res.json([]);
+
+    } catch (error) {
+        // 404 means no breaches found
+        if (error.response && error.response.status === 404) {
+            return res.json([]);
+        }
+
+        // For other errors, return empty array with a note (non-blocking)
+        console.log('Breach API error:', error.message);
+        return res.json([]);
     }
 });
 

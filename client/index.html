@@ -135,7 +135,6 @@
                 <p>Réduisez la taille de vos images sans perte visible de qualité (Local execution).</p>
 
                 <label class="file-drop-zone" id="compress-drop">
-                    <span class="file-icon">⚡</span>
                     <div style="font-weight:700; color:#ddd;">CLIQUEZ POUR SÉLECTIONNER UNE IMAGE</div>
                     <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP</div>
                     <input type="file" id="compress-file" accept="image/*" onchange="tools.compress.run()">
@@ -152,7 +151,6 @@
                 <p>Calcul d'empreinte SHA-256 et vérification VirusTotal.</p>
 
                 <label class="file-drop-zone">
-                    <span class="file-icon">🛡️</span>
                     <div style="font-weight:700; color:#ddd;">ANALYSER UN FICHIER SUSPECT</div>
                     <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">TOUT TYPE ACCEPTÉ</div>
                     <input type="file" id="scan-file" onchange="tools.scanner.run(this)">
@@ -199,19 +197,19 @@
                 <!-- 2. Options Grid -->
                 <div class="cyber-options"
                     style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; margin-bottom:1.5rem;">
-                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                    <label class="check-label checked">
                         <div class="check-indicator"></div>
                         <input type="checkbox" id="pass-upper" checked> MAJUSCULES
                     </label>
-                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                    <label class="check-label checked">
                         <div class="check-indicator"></div>
                         <input type="checkbox" id="pass-lower" checked> MINUSCULES
                     </label>
-                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                    <label class="check-label checked">
                         <div class="check-indicator"></div>
                         <input type="checkbox" id="pass-nums" checked> CHIFFRES
                     </label>
-                    <label class="check-label checked" onclick="this.classList.toggle('checked')">
+                    <label class="check-label checked">
                         <div class="check-indicator"></div>
                         <input type="checkbox" id="pass-syms" checked> SYMBOLES
                     </label>
@@ -283,6 +281,18 @@
         <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
         <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION FICHIER</div>
     </nav>
+
+    <!-- Custom Popup -->
+    <div id="cyber-popup"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;">
+        <div
+            style="background:#000; border:1px solid #00ff80; padding:2rem; width:350px; text-align:center; box-shadow:0 0 30px rgba(0,255,128,0.2); border-radius:8px;">
+            <h3 style="color:#00ff80; margin-top:0; text-transform:uppercase;">Attention</h3>
+            <p id="cyber-popup-msg" style="color:#fff; margin:1.5rem 0; font-size:1rem;">Message</p>
+            <button onclick="document.getElementById('cyber-popup').style.display='none'" class="action-btn"
+                style="width:100%;">COMPRIS</button>
+        </div>
+    </div>
 
     <script type="module" src="main.js"></script>
 </body>
