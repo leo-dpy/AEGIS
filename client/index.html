@@ -14,6 +14,7 @@
         src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
 </head>
 
 <body>
@@ -32,7 +33,7 @@
                 <div class="radar-container">
                     <div class="radar-sweep"></div>
                     <div class="radar-blip"></div>
-                    <div style="z-index:2; font-weight:700; font-size:0.8rem; letter-spacing:2px; color:#00ff80;">
+                    <div style="z-index:2; font-weight:700; font-size:0.8rem; letter-spacing:2px; color:#ffffff;">
                         SÉCURISÉ</div>
                 </div>
 
@@ -45,7 +46,7 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Statut Système</div>
-                        <div class="stat-value" style="color:#00ff80;">Opérationnel</div>
+                        <div class="stat-value" style="color:#ffffff;">Opérationnel</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Modules Actifs</div>
@@ -135,7 +136,7 @@
                             <div class="check-indicator"></div>
                             <input type="radio" name="compress-mode" value="quality">
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem;">🎨</div>
+                                <div style="font-size:1.2rem;"></div>
                                 <div>QUALITÉ</div>
                                 <div style="font-size:0.6rem; color:#666; margin-top:2px;">Légère réduction</div>
                             </div>
@@ -144,7 +145,7 @@
                             <div class="check-indicator"></div>
                             <input type="radio" name="compress-mode" value="balanced" checked>
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem;">⚖️</div>
+                                <div style="font-size:1.2rem;"></div>
                                 <div>ÉQUILIBRÉ</div>
                                 <div style="font-size:0.6rem; color:#666; margin-top:2px;">Recommandé</div>
                             </div>
@@ -153,7 +154,7 @@
                             <div class="check-indicator"></div>
                             <input type="radio" name="compress-mode" value="max">
                             <div style="text-align:center;">
-                                <div style="font-size:1.2rem;">📦</div>
+                                <div style="font-size:1.2rem;"></div>
                                 <div>MAXIMUM</div>
                                 <div style="font-size:0.6rem; color:#666; margin-top:2px;">Taille minimale</div>
                             </div>
@@ -162,7 +163,7 @@
                 </div>
 
                 <label class="file-drop-zone" id="compress-drop">
-                    <div style="font-weight:700; color:#ddd;">📁 SÉLECTIONNER UN FICHIER</div>
+                    <div style="font-weight:700; color:#ddd;">SÉLECTIONNER UN FICHIER</div>
                     <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">Images (JPG, PNG, WEBP) • PDF</div>
                     <input type="file" id="compress-file" accept="image/*,.pdf" onchange="tools.compress.run()">
                 </label>
@@ -191,7 +192,7 @@
                         </label>
                         <label class="check-label checked" id="convert-format-jpg">
                             <div class="check-indicator"></div>
-                            <input type="radio" name="convert-format" value="jpeg" checked>
+                            <input type="radio" name="convert-format" value="jpg" checked>
                             JPG
                         </label>
                         <label class="check-label" id="convert-format-jpeg">
@@ -229,7 +230,7 @@
 
 
                 <label class="file-drop-zone" id="convert-drop">
-                    <div style="font-weight:700; color:#ddd;">🖼️ SÉLECTIONNER UNE IMAGE</div>
+                    <div style="font-weight:700; color:#ddd;">SÉLECTIONNER UNE IMAGE</div>
                     <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP, GIF, BMP, SVG, TIFF,
                         HEIC...</div>
                     <input type="file" id="convert-file" accept="image/*" onchange="tools.converter.run()">
@@ -270,7 +271,7 @@
                 <!-- 1. Length Row (Compact Single Line) -->
                 <div style="display:flex; align-items:center; gap:15px; margin-bottom:1rem; margin-top:1.5rem;">
                     <div style="font-weight:700; color:#ccc; font-size:0.85rem; white-space:nowrap; min-width:120px;">
-                        LONGUEUR : <span id="len-disp" style="color:#00ff80; font-size:1rem;">24</span>
+                        LONGUEUR : <span id="len-disp" style="color:#ffffff; font-size:1rem;">24</span>
                     </div>
                     <input type="range" id="pass-len-range" value="24" min="8" max="64"
                         style="flex:1; width:auto; margin:0; cursor:pointer;"
@@ -317,7 +318,7 @@
                             style="background:#050505; border:1px solid #333; color:#fff; font-family:'Courier New', monospace; font-size:1.1rem; padding:15px; padding-right:50px; border-radius:4px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
                         </div>
                         <button onclick="tools.pass.copy()"
-                            style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#00ff80; font-size:1.4rem; cursor:pointer; padding:5px; transition:all 0.2s; opacity:0.9;">
+                            style="position:absolute; right:5px; top:50%; transform:translateY(-50%); background:transparent; border:none; color:#ffffff; font-size:1.4rem; cursor:pointer; padding:5px; transition:all 0.2s; opacity:0.9;">
                             ⎘
                         </button>
                     </div>
@@ -369,8 +370,8 @@
     <div id="cyber-popup"
         style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:center;">
         <div
-            style="background:#000; border:1px solid #00ff80; padding:2rem; width:350px; text-align:center; box-shadow:0 0 30px rgba(0,255,128,0.2); border-radius:8px;">
-            <h3 style="color:#00ff80; margin-top:0; text-transform:uppercase;">Attention</h3>
+            style="background:#000; border:1px solid #ffffff; padding:2rem; width:350px; text-align:center; box-shadow:0 0 30px rgba(255,255,255,0.2); border-radius:8px;">
+            <h3 style="color:#ffffff; margin-top:0; text-transform:uppercase;">Attention</h3>
             <p id="cyber-popup-msg" style="color:#fff; margin:1.5rem 0; font-size:1rem;">Message</p>
             <button onclick="document.getElementById('cyber-popup').style.display='none'" class="action-btn"
                 style="width:100%;">COMPRIS</button>

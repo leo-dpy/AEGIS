@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="cyber-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#888888;stop-opacity:1" />
+        </linearGradient>
+        <filter id="glow">
+            <feGaussianBlur stdDeviation="15" result="coloredBlur"/>
+            <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+        </filter>
+    </defs>
+    
+    <!-- Background Hexagon -->
+    <path d="M256 20 L480 140 L480 372 L256 492 L32 372 L32 140 Z" 
+          fill="#050505" 
+          stroke="url(#cyber-grad)" 
+          stroke-width="24"
+          filter="url(#glow)"/>
+          
+    <!-- Inner Detail -->
+    <path d="M256 80 L420 168 L420 344 L256 432 L92 344 L92 168 Z" 
+          fill="none" 
+          stroke="#ffffff" 
+          stroke-width="4" 
+          opacity="0.3"/>
+</svg>

@@ -167,10 +167,10 @@ const tools = {
 
             resBox.innerHTML = `
                 <div style="text-align:center; padding:20px;">
-                    <div style="font-size:2rem; margin-bottom:10px;">⏳</div>
+                    <div style="font-size:2rem; margin-bottom:10px;"></div>
                     <div>Compression ${fileType} en cours...</div>
                     <div style="color:#666; font-size:0.8rem; margin-top:5px;">${file.name}</div>
-                    <div style="color:#00ff80; font-size:0.7rem; margin-top:8px;">Mode: ${modeLabels[mode]}</div>
+                    <div style="color:#ffffff; font-size:0.7rem; margin-top:8px;">Mode: ${modeLabels[mode]}</div>
                 </div>
             `;
 
@@ -243,47 +243,46 @@ const tools = {
 
                 // Determine reduction quality
                 let reductionColor = 'lime';
-                let reductionEmoji = '🎉';
+                let reductionEmoji = '';
                 if (reduction < 10) {
                     reductionColor = '#888';
-                    reductionEmoji = '📊';
+                    reductionEmoji = '';
                 } else if (reduction < 30) {
                     reductionColor = '#00ff80';
-                    reductionEmoji = '✅';
+                    reductionEmoji = '';
                 }
 
                 resBox.innerHTML = `
-                    <div style="text-align:center;">
+                    <div class="result-container-centered">
                         <!-- Header -->
-                        <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">
+                        <div class="result-success-header">
                             COMPRESSION ${fileType} TERMINÉE
                         </div>
                         
                         <!-- Stats Grid -->
-                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;">
-                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333;">
-                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">ORIGINAL</div>
-                                <div style="color:#fff; font-size:1.2rem; font-weight:bold;">${formatSize(originalSize)}</div>
+                        <div class="stat-grid" style="width:100%;">
+                            <div class="stat-box">
+                                <div class="stat-label-sm">ORIGINAL</div>
+                                <div class="stat-value-lg">${formatSize(originalSize)}</div>
                             </div>
-                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333;">
-                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">COMPRESSÉ</div>
-                                <div style="color:#00ff80; font-size:1.2rem; font-weight:bold;">${formatSize(newSize)}</div>
+                            <div class="stat-box">
+                                <div class="stat-label-sm">COMPRESSÉ</div>
+                                <div class="stat-value-lg" style="color:#fff;">${formatSize(newSize)}</div>
                             </div>
-                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid ${reductionColor};">
-                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">RÉDUCTION</div>
-                                <div style="color:${reductionColor}; font-size:1.2rem; font-weight:bold;">${reductionEmoji} -${reduction}%</div>
+                            <div class="stat-box highlight" style="border-color:${reductionColor}; background:rgba(${reductionColor === 'lime' ? '0,255,0' : (reductionColor === '#00ff80' ? '0,255,128' : '136,136,136')}, 0.1);">
+                                <div class="stat-label-sm">RÉDUCTION</div>
+                                <div class="stat-value-lg" style="color:${reductionColor};">-${reduction}%</div>
                             </div>
                         </div>
                         
                         <!-- File info -->
-                        <div style="color:#666; font-size:0.8rem; margin-bottom:15px;">
-                            ${file.name} → ${saved > 0 ? formatSize(saved) + ' économisés' : 'Fichier déjà optimisé'}
+                        <div class="result-file-info">
+                            ${file.name} — <span style="color:#fff">${saved > 0 ? formatSize(saved) + ' économisés' : 'Optimisation maximale atteinte'}</span>
                         </div>
                         
                         <!-- Download Button -->
-                        <a href="${url}" download="compressed_${file.name}" class="action-btn" 
-                           style="text-decoration:none; display:inline-block; background:#00ff80; color:#000; padding:12px 30px;">
-                            📥 TÉLÉCHARGER
+                        <a href="${url}" download="compressed_${file.name}" class="action-btn">
+                            TÉLÉCHARGER LE FICHIER
                         </a>
                     </div>
                 `;
@@ -293,8 +292,9 @@ const tools = {
                 console.error('Compression error:', e);
                 resBox.innerHTML = `
                     <div style="text-align:center; color:red;">
-                        <div style="font-size:2rem; margin-bottom:10px;">❌</div>
+                        <div style="font-size:2rem; margin-bottom:10px;"></div>
                         <div>Erreur de compression</div>
+                    </div>
                 `;
                 document.getElementById('compress-file').value = '';
             }
@@ -317,7 +317,8 @@ const tools = {
 
             const formatNames = {
                 'png': 'PNG',
-                'jpeg': 'JPG',
+                'jpg': 'JPG',
+                'jpeg': 'JPEG',
                 'webp': 'WEBP',
                 'gif': 'GIF',
                 'bmp': 'BMP',
@@ -327,7 +328,8 @@ const tools = {
 
             const formatExtensions = {
                 'png': 'png',
-                'jpeg': 'jpg',
+                'jpg': 'jpg',
+                'jpeg': 'jpeg',
                 'webp': 'webp',
                 'gif': 'gif',
                 'bmp': 'bmp',
@@ -337,7 +339,7 @@ const tools = {
 
             resBox.innerHTML = `
                 <div style="text-align:center; padding:20px;">
-                    <div style="font-size:2rem; margin-bottom:10px;">🔄</div>
+                    <div style="font-size:2rem; margin-bottom:10px;"></div>
                     <div>Conversion en ${formatNames[format]} en cours...</div>
                     <div style="color:#666; font-size:0.8rem; margin-top:5px;">${file.name}</div>
                 </div>
@@ -383,6 +385,7 @@ const tools = {
                 } else {
                     // Convert to blob for other formats
                     let mimeType = `image/${format}`;
+                    if (format === 'jpg') mimeType = 'image/jpeg';
                     if (format === 'ico') mimeType = 'image/png';
                     if (format === 'bmp') mimeType = 'image/bmp';
 
@@ -417,36 +420,35 @@ const tools = {
                 const newFileName = `${baseName}.${formatExtensions[format]}`;
 
                 resBox.innerHTML = `
-                    <div style="text-align:center;">
+                    <div class="result-container-centered">
                         <!-- Header -->
-                        <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">
-                            ✅ CONVERSION TERMINÉE
+                        <div class="result-success-header">
+                            CONVERSION RÉUSSIE
                         </div>
                         
-                        <!-- Conversion Arrow -->
-                        <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:20px;">
-                            <div style="background:#111; padding:15px 25px; border-radius:8px; border:1px solid #333;">
-                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">FORMAT ORIGINAL</div>
-                                <div style="color:#fff; font-size:1.2rem; font-weight:bold;">${originalFormat}</div>
-                                <div style="color:#666; font-size:0.7rem; margin-top:5px;">${formatSize(originalSize)}</div>
+                        <!-- Conversion Flow -->
+                        <div class="conversion-flow">
+                            <div class="stat-box" style="min-width:120px;">
+                                <div class="stat-label-sm">SOURCE (${originalFormat})</div>
+                                <div class="stat-value-lg">${formatSize(originalSize)}</div>
                             </div>
-                            <div style="color:#00ff80; font-size:1.5rem;">→</div>
-                            <div style="background:#111; padding:15px 25px; border-radius:8px; border:1px solid #00ff80;">
-                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">NOUVEAU FORMAT</div>
-                                <div style="color:#00ff80; font-size:1.2rem; font-weight:bold;">${formatNames[format]}</div>
-                                <div style="color:#666; font-size:0.7rem; margin-top:5px;">${formatSize(newSize)}</div>
+                            
+                            <div class="flow-arrow">→</div>
+                            
+                            <div class="stat-box highlight" style="min-width:120px;">
+                                <div class="stat-label-sm">SORTIE (${formatNames[format]})</div>
+                                <div class="stat-value-lg" style="color:var(--accent);">${formatSize(newSize)}</div>
                             </div>
                         </div>
                         
-                        <!-- Preview -->
-                        <div style="margin-bottom:15px;">
-                            <img src="${url}" style="max-width:200px; max-height:150px; border-radius:8px; border:1px solid #333;">
+                        <!-- File info -->
+                        <div class="result-file-info">
+                            ${newFileName}
                         </div>
                         
                         <!-- Download Button -->
-                        <a href="${url}" download="${newFileName}" class="action-btn" 
-                           style="text-decoration:none; display:inline-block; background:#00ff80; color:#000; padding:12px 30px;">
-                            📥 TÉLÉCHARGER ${formatNames[format]}
+                        <a href="${url}" download="${newFileName}" class="action-btn">
+                            TÉLÉCHARGER ${formatNames[format]}
                         </a>
                     </div>
                 `;
@@ -456,7 +458,7 @@ const tools = {
                 console.error('Conversion error:', e);
                 resBox.innerHTML = `
                     <div style="text-align:center; color:red;">
-                        <div style="font-size:2rem; margin-bottom:10px;">❌</div>
+                        <div style="font-size:2rem; margin-bottom:10px;"></div>
                         <div>Erreur de conversion</div>
                         <div style="color:#666; font-size:0.8rem; margin-top:5px;">${e.message}</div>
                     </div>
@@ -571,7 +573,7 @@ const tools = {
                     ${vtHtml}
                     <div style="display:grid; gap:8px; font-size:0.9rem;">
                         <div><span style="color:#666;">URL :</span> <span style="color:#fff;">${data.originalUrl}</span></div>
-                        <div><span style="color:#666;">Destination :</span> <a href="${data.finalUrl}" target="_blank" style="color:#00ff80;">${data.finalUrl}</a></div>
+                        <div><span style="color:#666;">Destination :</span> <a href="${data.finalUrl}" target="_blank" style="color:#ffffff;">${data.finalUrl}</a></div>
                         <div><span style="color:#666;">Code HTTP :</span> <b style="color:${data.statusCode < 400 ? 'lime' : 'red'}">${data.statusCode}</b></div>
                     </div>
                     ${warningsHtml}
@@ -624,7 +626,7 @@ const tools = {
             let color = 'red';
             let txt = 'FAIBLE';
             if (score >= 4) { color = 'lime'; txt = 'EXCELLENT'; }
-            else if (score >= 3) { color = '#00ff80'; txt = 'FORT'; }
+            else if (score >= 3) { color = '#ffffff'; txt = 'FORT'; }
             else if (score >= 2) { color = 'orange'; txt = 'MOYEN'; }
 
             document.getElementById('pass-gen-strength-label').innerHTML = `<span style="color:${color}">SÉCURITÉ: ${txt}</span>`;
@@ -637,7 +639,7 @@ const tools = {
                 const btn = document.querySelector('#pass-result-box button');
                 const original = btn.innerHTML;
                 btn.innerHTML = '✓';
-                btn.style.color = '#00ff80';
+                btn.style.color = '#ffffff';
                 setTimeout(() => {
                     btn.innerHTML = original;
                     btn.style.borderColor = ''; // reset to stylesheet
@@ -666,7 +668,7 @@ const tools = {
 
             if (score < 2) { msg = 'TRÈS FAIBLE (Inutilisable)'; color = 'red'; }
             else if (score < 4) { msg = 'MOYEN (Peut mieux faire)'; color = 'orange'; }
-            else if (score < 5) { msg = 'FORT (Bon)'; color = '#00ff80'; }
+            else if (score < 5) { msg = 'FORT (Bon)'; color = '#ffffff'; }
             else { msg = 'TRÈS FORT (Excellent)'; color = 'lime'; }
 
             resBox.innerHTML = `<span style="color:${color}">${msg}</span>`;
