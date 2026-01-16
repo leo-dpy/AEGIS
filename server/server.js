@@ -126,6 +126,74 @@ app.get('/api/breach/:email', async (req, res) => {
     }
 });
 
+// 4. URL Analysis (VirusTotal)
+app.get('/api/url-info', async (req, res) => {
+    const { url } = req.query;
+    if (!url) return res.status(400).json({ error: 'URL is required' });
+
+    try {
+        // VT v3 URL ID is base64 w/o padding
+        const urlId = Buffer.from(url).toString('base64').replace(/=/g, '');
+
+        const response = await axios.get(`https://www.virustotal.com/api/v3/urls/${urlId}`, {
+            headers: { 'x-apikey': VIRUSTOTAL_API_KEY }
+        });
+
+        const data = response.data.data.attributes;
+        const stats = data.last_analysis_stats;
+
+        // Calculate risk
+        const malicious = stats.malicious;
+        const suspicious = stats.suspicious;
+
+        let riskLevel = 'SÉCURISÉ';
+        let riskColor = 'lime';
+
+        if (malicious > 0) {
+            riskLevel = 'MALVEILLANT';
+            riskColor = 'red';
+        } else if (suspicious > 0) {
+            riskLevel = 'SUSPECT';
+            riskColor = 'orange';
+        }
+
+        res.json({
+            originalUrl: url,
+            finalUrl: data.url || url,
+            statusCode: data.last_http_response_code || 200,
+            riskLevel,
+            riskColor,
+            virusTotal: {
+                totalEngines: Object.keys(data.last_analysis_results).length,
+                malicious: stats.malicious,
+                suspicious: stats.suspicious,
+                harmless: stats.harmless,
+                undetected: stats.undetected
+            },
+            warnings: []
+        });
+
+    } catch (error) {
+        console.log("VT URL Check failed / Not Found:", error.message);
+        // Fallback for demo or not found
+        res.json({
+            originalUrl: url,
+            finalUrl: url,
+            statusCode: 0,
+            riskLevel: 'INCONNU',
+            riskColor: '#888',
+            virusTotal: {
+                totalEngines: 0,
+                malicious: 0,
+                suspicious: 0,
+                harmless: 0,
+                undetected: 0
+            },
+            warnings: ['URL non trouvée dans la base VirusTotal (Jamais scannée ?)']
+        });
+    }
+});
+
 app.listen(PORT, () => {
     console.log(`AEGIS Server running on port ${PORT}`);
 });

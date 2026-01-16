@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AEGIS | Toolkit de Sécurité</title>
+    <title>AEGIS | ToolKit </title>
     <link rel="stylesheet" href="style.css">
     <!-- Police Pro 'Inter' -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
@@ -20,8 +20,7 @@
 <body>
 
     <header>
-        <div class="logo">AEGIS<span style="font-weight:400; color:#666">.PRO</span></div>
-        <div class="status-badge">v2.1 • SÉCURISÉ</div>
+        <div class="logo">AEGIS<span style="font-weight:400; color:#666"> TOOLKIT</span></div>
     </header>
 
     <div id="main-content">
@@ -29,13 +28,6 @@
         <!-- ACCUEIL (Dashboard) -->
         <section id="view-dashboard" class="view-section active" style="height:100%">
             <div class="hero-section">
-
-                <div class="radar-container">
-                    <div class="radar-sweep"></div>
-                    <div class="radar-blip"></div>
-                    <div style="z-index:2; font-weight:700; font-size:0.8rem; letter-spacing:2px; color:#ffffff;">
-                        SÉCURISÉ</div>
-                </div>
 
                 <h1 style="font-size: 2.5rem; letter-spacing: -1px; margin-bottom:2rem;">AEGIS INTEGRITY SYSTEM</h1>
 
@@ -50,7 +42,44 @@
                     </div>
                     <div class="stat-card">
                         <div class="stat-label">Modules Actifs</div>
-                        <div class="stat-value">11 Outils</div>
+                        <div class="stat-value">10 Outils</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 4rem; max-width: 800px; text-align: left;">
+                    <h3
+                        style="color:#ffffff; font-size: 1.2rem; margin-bottom: 2rem; text-align: center; text-transform: uppercase; letter-spacing: 2px;">
+                        Pourquoi choisir AEGIS ?</h3>
+
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+                        <!-- Point 1 -->
+                        <div
+                            style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="color: #ffffff; font-size: 1.5rem; margin-bottom: 1rem;">🔒</div>
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">Confidentialité Absolue</h4>
+                            <p style="font-size: 0.9rem; color: #888; margin: 0;">Vos fichiers ne quittent jamais votre
+                                appareil. Tout le traitement (compression, conversion, nettoyage) est effectué
+                                localement dans votre navigateur.</p>
+                        </div>
+
+                        <!-- Point 2 -->
+                        <div
+                            style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="color: #ffffff; font-size: 1.5rem; margin-bottom: 1rem;">⚡</div>
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">Zéro Latence</h4>
+                            <p style="font-size: 0.9rem; color: #888; margin: 0;">Pas d'attente de téléchargement. Les
+                                outils s'exécutent instantanément grâce à la puissance de votre propre machine.</p>
+                        </div>
+
+                        <!-- Point 3 -->
+                        <div
+                            style="background: rgba(255,255,255,0.03); padding: 1.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+                            <div style="color: #ffffff; font-size: 1.5rem; margin-bottom: 1rem;">🛠️</div>
+                            <h4 style="color: #fff; margin-bottom: 0.5rem;">Suite Complète</h4>
+                            <p style="font-size: 0.9rem; color: #888; margin: 0;">Plus besoin de 10 sites différents.
+                                Analyse de sécurité, gestion de fichiers et outils de confidentialité réunis en une
+                                seule interface.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -256,6 +285,19 @@
             </div>
         </section>
 
+        <!-- OUTIL: URL INSPECTOR -->
+        <section id="view-url" class="view-section">
+            <h2>Inspecteur d'URL</h2>
+            <div class="panel">
+                <p>Scannez une adresse web suspecte avant de cliquer.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="url-input" placeholder="https://site-douteux.com">
+                    <button class="action-btn" onclick="tools.url.run()">SCANNER</button>
+                </div>
+                <div id="url-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
 
 
         <!-- OUTIL 8: PASS -->
@@ -356,14 +398,15 @@
     <nav class="dock-container">
         <div class="dock-item active" onclick="app.navigate('dashboard')">ACCUEIL</div>
         <div class="dock-item" onclick="app.navigate('ip')">MON IP</div>
+        <div class="dock-item" onclick="app.navigate('url')">TEST URL</div>
+        <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
         <div class="dock-item" onclick="app.navigate('pass')">MOTS DE PASSE</div>
         <div class="dock-item" onclick="app.navigate('qrcode')">QR CODE</div>
-        <div class="dock-item" onclick="app.navigate('breach')">FUITE EMAIL</div>
+        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSER</div>
+        <div class="dock-item" onclick="app.navigate('converter')">CONVERTIR</div>
         <div class="dock-item" onclick="app.navigate('exif')">PHOTO CLEAN</div>
         <div class="dock-item" onclick="app.navigate('sanitizer')">TEXTE CLEAN</div>
-        <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
-        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION</div>
-        <div class="dock-item" onclick="app.navigate('converter')">CONVERTIR</div>
+        <div class="dock-item" onclick="app.navigate('breach')">FUITE EMAIL</div>
     </nav>
 
     <!-- Custom Popup -->

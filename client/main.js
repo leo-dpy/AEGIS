@@ -22,10 +22,10 @@ const app = {
     // Init Dashboard Widget
     initDashboard: async () => {
         try {
-            const res = await fetch(`${API_URL}/ip`);
+            const res = await fetch('https://ipwho.is/');
             const data = await res.json();
             const dashIp = document.getElementById('dash-ip');
-            if (dashIp) dashIp.textContent = data.query;
+            if (dashIp) dashIp.textContent = data.ip;
         } catch (e) { /* silent fail */ }
     }
 };
@@ -516,40 +516,39 @@ const tools = {
             if (!url) return;
 
             resBox.style.display = 'block';
-            resBox.innerHTML = '<div style="text-align:center;">🔍 Analyse VirusTotal en cours...</div>';
+            resBox.innerHTML = '<div style="text-align:center;">Analyse VirusTotal en cours...</div>';
 
             try {
                 const res = await fetch(`${API_URL}/url-info?url=${encodeURIComponent(url)}`);
                 const data = await res.json();
 
                 if (data.error) {
-                    resBox.innerHTML = `<span style="color:red">${data.error}</span>`;
+                    resBox.innerHTML = `<div style="text-align:center; color:red;">${data.error}</div>`;
                     return;
                 }
 
                 // Build VirusTotal stats HTML
-                let vtHtml = '';
+                let vtGridHtml = '';
                 if (data.virusTotal) {
                     const vt = data.virusTotal;
-                    vtHtml = `
-                        <div style="margin:15px 0; padding:15px; background:#111; border:1px solid #333; border-radius:8px;">
-                            <div style="color:#888; font-size:0.75rem; margin-bottom:10px;">ANALYSE VIRUSTOTAL (${vt.totalEngines} moteurs)</div>
-                            <div style="display:flex; gap:20px; flex-wrap:wrap;">
-                                <div style="text-align:center;">
-                                    <div style="font-size:1.5rem; font-weight:bold; color:${vt.malicious > 0 ? 'red' : '#444'};">${vt.malicious}</div>
-                                    <div style="font-size:0.7rem; color:#888;">MALVEILLANT</div>
+                    vtGridHtml = `
+                        <div style="width:100%; margin-bottom:8px;">
+                            <div class="stat-grid" style="grid-template-columns: repeat(4, 1fr); gap:4px;">
+                                <div class="stat-box" style="padding:5px; ${vt.malicious > 0 ? 'border-color:red; background:rgba(255,0,0,0.1);' : ''}">
+                                    <div class="stat-label-sm" style="font-size:0.65rem; margin-bottom:2px;">MALVEILLANT</div>
+                                    <div class="stat-value-lg" style="font-size:1.1rem; color:${vt.malicious > 0 ? 'red' : '#444'};">${vt.malicious}</div>
                                 </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:1.5rem; font-weight:bold; color:${vt.suspicious > 0 ? 'orange' : '#444'};">${vt.suspicious}</div>
-                                    <div style="font-size:0.7rem; color:#888;">SUSPECT</div>
+                                <div class="stat-box" style="padding:5px; ${vt.suspicious > 0 ? 'border-color:orange; background:rgba(255,165,0,0.1);' : ''}">
+                                    <div class="stat-label-sm" style="font-size:0.65rem; margin-bottom:2px;">SUSPECT</div>
+                                    <div class="stat-value-lg" style="font-size:1.1rem; color:${vt.suspicious > 0 ? 'orange' : '#444'};">${vt.suspicious}</div>
                                 </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:1.5rem; font-weight:bold; color:lime;">${vt.harmless}</div>
-                                    <div style="font-size:0.7rem; color:#888;">SÛR</div>
+                                <div class="stat-box" style="padding:5px;">
+                                    <div class="stat-label-sm" style="font-size:0.65rem; margin-bottom:2px;">SÛR</div>
+                                    <div class="stat-value-lg" style="font-size:1.1rem; color:lime;">${vt.harmless}</div>
                                 </div>
-                                <div style="text-align:center;">
-                                    <div style="font-size:1.5rem; font-weight:bold; color:#666;">${vt.undetected}</div>
-                                    <div style="font-size:0.7rem; color:#888;">NON TESTÉ</div>
+                                <div class="stat-box" style="padding:5px;">
+                                    <div class="stat-label-sm" style="font-size:0.65rem; margin-bottom:2px;">NON TESTÉ</div>
+                                    <div class="stat-value-lg" style="font-size:1.1rem; color:#666;">${vt.undetected}</div>
                                 </div>
                             </div>
                         </div>
@@ -559,27 +558,36 @@ const tools = {
                 // Build warnings HTML
                 let warningsHtml = '';
                 if (data.warnings && data.warnings.length > 0) {
-                    warningsHtml = `<div style="margin-top:15px; padding:10px; background:rgba(255,100,0,0.1); border:1px solid rgba(255,100,0,0.3); border-radius:4px;">
-                        <div style="color:orange; font-weight:bold; margin-bottom:8px;">⚠️ ALERTES:</div>
-                        ${data.warnings.map(w => `<div style="color:#ccc; margin-left:10px;">• ${w}</div>`).join('')}
+                    warningsHtml = `<div style="margin-top:8px; padding:8px; background:rgba(255,165,0,0.1); border:1px solid orange; border-radius:4px; width:100%;">
+                        <div style="color:orange; font-weight:bold; margin-bottom:2px; font-size:0.75rem;">⚠️ ALERTES</div>
+                        ${data.warnings.map(w => `<div style="color:#ccc; font-size:0.85rem;">${w}</div>`).join('')}
                     </div>`;
                 }
 
                 resBox.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding-bottom:15px; border-bottom:1px solid #333;">
-                        <span style="font-size:0.8rem; color:#888;">VERDICT</span>
-                        <span style="font-size:1.3rem; font-weight:bold; color:${data.riskColor}; text-shadow:0 0 10px ${data.riskColor};">${data.riskLevel}</span>
+                    <div class="result-container-centered" style="padding:0;">
+                        <!-- Stats -->
+                        ${vtGridHtml}
+
+                        <!-- Details Map -->
+                        <div style="background:#111; border:1px solid #333; border-radius:6px; padding:15px; width:100%; margin-top:5px;">
+                            <div style="display:grid; grid-template-columns: auto 1fr; gap:8px 15px; font-size:0.95rem; align-items:center;">
+                                <div style="color:#888; text-align:right; font-weight:bold; font-size:0.8rem;">CIBLE</div>
+                                <div style="color:#fff; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:250px;" title="${data.originalUrl}">${data.originalUrl}</div>
+                                
+                                <div style="color:#888; text-align:right; font-weight:bold; font-size:0.8rem;">DEST.</div>
+                                <div style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:250px;"><a href="${data.finalUrl}" target="_blank" style="color:#ffffff; text-decoration:underline;" title="${data.finalUrl}">${data.finalUrl}</a></div>
+                                
+                                <div style="color:#888; text-align:right; font-weight:bold; font-size:0.8rem;">HTTP</div>
+                                <div><b style="color:${data.statusCode < 400 ? 'lime' : 'red'}">${data.statusCode}</b></div>
+                            </div>
+                        </div>
+
+                        ${warningsHtml}
                     </div>
-                    ${vtHtml}
-                    <div style="display:grid; gap:8px; font-size:0.9rem;">
-                        <div><span style="color:#666;">URL :</span> <span style="color:#fff;">${data.originalUrl}</span></div>
-                        <div><span style="color:#666;">Destination :</span> <a href="${data.finalUrl}" target="_blank" style="color:#ffffff;">${data.finalUrl}</a></div>
-                        <div><span style="color:#666;">Code HTTP :</span> <b style="color:${data.statusCode < 400 ? 'lime' : 'red'}">${data.statusCode}</b></div>
-                    </div>
-                    ${warningsHtml}
                 `;
             } catch (e) {
-                resBox.innerHTML = '<span style="color:red">Erreur lors de l\'analyse de l\'URL</span>';
+                resBox.innerHTML = '<div style="text-align:center; color:red;">Erreur lors de l\'analyse de l\'URL</div>';
             }
         }
     },
