@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AEGIS | Toolkit de Sécurité</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Police Pro 'Inter' -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <!-- Libs -->
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+</head>
+
+<body>
+
+    <header>
+        <div class="logo">AEGIS<span style="font-weight:400; color:#666">.PRO</span></div>
+        <div class="status-badge">v2.1 • SÉCURISÉ</div>
+    </header>
+
+    <div id="main-content">
+
+        <!-- ACCUEIL (Dashboard) -->
+        <section id="view-dashboard" class="view-section active" style="height:100%">
+            <div class="hero-section">
+
+                <div class="radar-container">
+                    <div class="radar-sweep"></div>
+                    <div class="radar-blip"></div>
+                    <div style="z-index:2; font-weight:700; font-size:0.8rem; letter-spacing:2px; color:#00ff80;">
+                        SÉCURISÉ</div>
+                </div>
+
+                <h1 style="font-size: 2.5rem; letter-spacing: -1px; margin-bottom:2rem;">AEGIS INTEGRITY SYSTEM</h1>
+
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Votre IP</div>
+                        <div class="stat-value" id="dash-ip">Scan...</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Statut Système</div>
+                        <div class="stat-value" style="color:#00ff80;">Opérationnel</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Modules Actifs</div>
+                        <div class="stat-value">9 Outils</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- OUTIL 1: ANALYSE IP -->
+        <section id="view-ip" class="view-section">
+            <h2>Analyse d'Identité IP</h2>
+            <div class="panel">
+                <div id="ip-results"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                    Chargement des données...
+                </div>
+            </div>
+        </section>
+
+        <!-- OUTIL 2: WHOIS -->
+        <section id="view-whois" class="view-section">
+            <h2>Information Domaine (WHOIS)</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Rechercher les informations d'enregistrement d'un nom de domaine.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="whois-input" placeholder="exemple.com">
+                    <button class="action-btn" onclick="tools.whois.run()">RECHERCHER</button>
+                </div>
+                <div id="whois-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 3: EXIF -->
+        <section id="view-exif" class="view-section">
+            <h2>Nettoyeur de Métadonnées EXIF</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Supprimez les données GPS et infos sensibles de vos photos avant
+                    partage.</p>
+                <div
+                    style="border: 2px dashed #333; padding: 2rem; text-align: center; border-radius: 8px; margin-bottom: 1rem;">
+                    <input type="file" id="exif-file" accept="image/*" onchange="tools.exif.handleFile(this)"
+                        style="display:none;">
+                    <button class="action-btn" onclick="document.getElementById('exif-file').click()">SÉLECTIONNER UNE
+                        IMAGE</button>
+                    <div id="exif-filename" style="margin-top: 10px; color: #fff;"></div>
+                </div>
+                <div id="exif-data" class="result-box" style="display:none;"></div>
+                <button id="exif-clean-btn" class="action-btn"
+                    style="display:none; margin-top:1rem; background: #fff; color:#000;"
+                    onclick="tools.exif.clean()">PURGER LES MÉTADONNÉES</button>
+                <div id="exif-download" style="margin-top:1rem;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 4: SANITIZER -->
+        <section id="view-sanitizer" class="view-section">
+            <h2>Normalisation de Texte</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Nettoie les caractères invisibles (Zero-width spaces) et les artefacts
+                    de formatage.</p>
+                <div style="display: grid; gap: 1rem;">
+                    <textarea id="san-input" rows="6" placeholder="Collez votre texte suspect ici..."></textarea>
+                    <button class="action-btn" onclick="tools.sanitizer.run()">NETTOYER LE TEXTE</button>
+                    <textarea id="san-output" rows="6" readonly
+                        placeholder="Le résultat propre apparaîtra ici..."></textarea>
+                </div>
+            </div>
+        </section>
+
+        <!-- OUTIL 5: COMPRESSOR -->
+        <section id="view-compress" class="view-section">
+            <h2>Compression Sécurisée</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Réduction de la taille des images localement (sans envoi serveur).</p>
+                <input type="file" id="compress-file" accept="image/*">
+                <button class="action-btn" style="margin-top: 0.5rem;" onclick="tools.compress.run()">LANCER LA
+                    COMPRESSION</button>
+                <div id="compress-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 6: SCANNER -->
+        <section id="view-scanner" class="view-section">
+            <h2>Contrôle d'Intégrité de Fichier</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Calcul d'empreinte SHA-256 locale et vérification VirusTotal.</p>
+                <input type="file" id="scan-file" onchange="tools.scanner.run(this)">
+                <div id="scan-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 7: URL -->
+        <section id="view-url" class="view-section">
+            <h2>Inspecteur de Liens</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Analyse les redirections et la réputation des URL raccourcies.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="url-input" placeholder="https://bit.ly/...">
+                    <button class="action-btn" onclick="tools.url.run()">INSPECTER</button>
+                </div>
+                <div id="url-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 8: PASS -->
+        <section id="view-pass" class="view-section">
+            <h2>Gestion Mots de Passe</h2>
+
+            <!-- Générateur -->
+            <div class="panel" style="margin-bottom: 2rem;">
+                <h3>Générateur</h3>
+                <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem;">
+                    <label>Longueur : <input type="number" id="pass-len" value="20" min="8" max="64"
+                            style="width: 80px; display: inline-block;"></label>
+                </div>
+                <button class="action-btn" onclick="tools.pass.run()">GÉNÉRER UN MOT DE PASSE FORT</button>
+                <div id="pass-result" class="result-box"
+                    style="font-size: 1.5rem; text-align: center; letter-spacing: 2px;"></div>
+            </div>
+
+            <!-- Testeur -->
+            <div class="panel">
+                <h3>Testeur de Force</h3>
+                <p style="margin-bottom: 1rem;">Vérifiez la robustesse de vos mots de passe (Test local).</p>
+                <input type="text" id="pass-test-input" placeholder="Tapez un mot de passe à tester..."
+                    oninput="tools.pass.check()">
+                <div id="pass-test-result" class="result-box"
+                    style="display:none; text-align:center; font-weight:bold; font-size:1.2rem;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL 9: BREACH -->
+        <section id="view-breach" class="view-section">
+            <h2>Radar de Fuites (HIBP)</h2>
+            <div class="panel">
+                <p style="margin-bottom: 1rem;">Vérifie si une adresse email a été compromise dans une base de données
+                    publique.</p>
+                <div style="display: flex; gap: 10px;">
+                    <input type="email" id="breach-input" placeholder="email@exemple.com">
+                    <button class="action-btn" onclick="tools.breach.run()">VÉRIFIER</button>
+                </div>
+                <div id="breach-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- NAVIGATION DOCK FLOTTANT -->
+    <nav class="dock-container">
+        <div class="dock-item active" onclick="app.navigate('dashboard')">ACCUEIL</div>
+        <div class="dock-item" onclick="app.navigate('ip')">MON IP</div>
+        <div class="dock-item" onclick="app.navigate('whois')">INFO SITE</div>
+        <div class="dock-item" onclick="app.navigate('exif')">PHOTO CLEAN</div>
+        <div class="dock-item" onclick="app.navigate('sanitizer')">TEXTE CLEAN</div>
+        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION FICHIER</div>
+        <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
+        <div class="dock-item" onclick="app.navigate('url')">TEST LIEN</div>
+        <div class="dock-item" onclick="app.navigate('pass')">MOTS DE PASSE</div>
+        <div class="dock-item" onclick="app.navigate('breach')">FUITE EMAIL</div>
+    </nav>
+
+    <script type="module" src="main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,366 @@
+:root {
+    --bg-dark: #050505;
+    --bg-panel: #0a0a0a;
+    --text-main: #ffffff;
+    --text-dim: #888888;
+    --border-color: #333333;
+    --accent: #00ff80;
+    /* Cyber Green */
+
+    --dock-bg: rgba(10, 10, 10, 0.8);
+    --dock-border: rgba(255, 255, 255, 0.1);
+
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* Modern Background & Layout */
+body {
+    background-color: var(--bg-dark);
+    /* Grid Pattern */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+
+    color: var(--text-main);
+    font-family: var(--font-main);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header Minimaliste */
+header {
+    padding: 1.5rem 2rem;
+    background: transparent;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 10;
+}
+
+.logo {
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.status-badge {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    border: 1px solid var(--border-color);
+    padding: 0.2rem 0.6rem;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+/* Zone Principale */
+#main-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+    padding-bottom: 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+    width: 100%;
+
+    /* Hide scrollbar */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+#main-content::-webkit-scrollbar {
+    display: none;
+}
+
+/* DASHBOARD / HERO SECTION */
+.hero-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    min-height: 60vh;
+}
+
+/* RADAR ANIMATION */
+.radar-container {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: radial-gradient(circle, rgba(0, 255, 128, 0.05) 0%, transparent 70%);
+    position: relative;
+    margin-bottom: 3rem;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radar-sweep {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 50%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent));
+    transform-origin: 0 0;
+    animation: sweep 2s infinite linear;
+}
+
+@keyframes sweep {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.radar-blip {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--accent);
+    animation: blip 2s infinite ease-out;
+    opacity: 0;
+    position: absolute;
+    top: 30%;
+    left: 60%;
+}
+
+@keyframes blip {
+    0% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(3);
+    }
+}
+
+/* DASHBOARD STATS CARDS */
+.dashboard-stats {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    min-width: 200px;
+    text-align: left;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+}
+
+/* Typography */
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 1rem;
+}
+
+p {
+    color: var(--text-dim);
+    line-height: 1.6;
+}
+
+/* Views Animations */
+.view-section {
+    display: none;
+    animation: fadeUp 0.3s ease-out;
+}
+
+.view-section.active {
+    display: block;
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* DOCK FLOTTANT TEXTU */
+.dock-container {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dock-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--dock-border);
+    border-radius: 12px;
+    padding: 0.6rem;
+    display: flex;
+    gap: 0.5rem;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    max-width: 95%;
+    overflow-x: auto;
+}
+
+.dock-item {
+    position: relative;
+    /* width: 50px; Removed fixed width */
+    height: 40px;
+    padding: 0 1.2rem;
+    /* Add padding for text */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    /* Less rounded */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    /* Smaller font */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    white-space: nowrap;
+}
+
+.dock-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    transform: translateY(-2px);
+}
+
+.dock-item.active {
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+/* Tooltip pour le dock (Moins nécessaire avec du texte, mais on garde pour info détaillée) */
+.dock-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: -35px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #000;
+    color: #fff;
+    padding: 3px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+    border: 1px solid var(--border-color);
+}
+
+.dock-item:hover::after {
+    opacity: 1;
+    transform: translateX(-50%);
+    top: -45px;
+}
+
+/* Components UI */
+.panel {
+    background: var(--bg-panel);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+button.action-btn {
+    background: #fff;
+    color: #000;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+button.action-btn:hover {
+    opacity: 0.9;
+}
+
+input,
+textarea {
+    background: #000;
+    border: 1px solid var(--border-color);
+    color: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+input:focus,
+textarea:focus {
+    border-color: #fff;
+    outline: none;
+}
+
+.result-box {
+    background: #000;
+    border: 1px solid var(--border-color);
+    padding: 1.5rem;
+    border-radius: 6px;
+    font-family: monospace;
+    white-space: pre-wrap;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
