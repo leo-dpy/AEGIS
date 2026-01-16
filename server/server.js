@@ -9,20 +9,23 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuration Middleware
+// Middleware
 app.use(cors());
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan('dev'));
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '../client')));
 
-// Fallback: sert index.html pour la route racine '/' et toute autre route non-API
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/index.html'));
-});
+// Serve Static Frontend
+// Explicitly resolve the path to the client directory
+const CLIENT_PATH = path.resolve(__dirname, '../client');
+console.log(`[INFO] Serving static files from: ${CLIENT_PATH}`);
+
+app.use(express.static(CLIENT_PATH));
 
 // Clé API VirusTotal (Env ou Fallback)
 const VIRUSTOTAL_API_KEY = process.env.TotaVirus_API || process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key';
+
+// --- API ROUTES ---
 
 // Route : Analyse de fichier via VirusTotal
 app.get('/api/virustotal/:hash', async (req, res) => {
@@ -33,6 +36,7 @@ app.get('/api/virustotal/:hash', async (req, res) => {
         res.json(response.data);
     } catch (e) {
         // En cas d'erreur ou de clé invalide, retourne des données factices pour la démo
+        // console.error("VT Error:", e.message);
         res.json({ data: { attributes: { last_analysis_stats: { malicious: 0, suspicious: 0, harmless: 100 }, meaningful_name: "demo_file.exe" } } });
     }
 });
@@ -85,6 +89,12 @@ app.get('/api/url-info', async (req, res) => {
     } catch (e) {
         res.json({ riskLevel: 'INCONNU', riskColor: '#888', virusTotal: null, warnings: ['URL non trouvée ou erreur API'] });
     }
+});
+
+// --- SPA FALLBACK ---
+// This must be AFTER all API routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(CLIENT_PATH, 'index.html'));
 });
 
 // Démarrage du serveur
