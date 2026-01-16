@@ -16,6 +16,11 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../client')));
 
+// Fallback: sert index.html pour la route racine '/' et toute autre route non-API
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/index.html'));
+});
+
 // Clé API VirusTotal (Env ou Fallback)
 const VIRUSTOTAL_API_KEY = process.env.TotaVirus_API || process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key';
 
