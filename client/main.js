@@ -78,25 +78,6 @@ const tools = {
         }
     },
 
-    // 2. WHOIS
-    whois: {
-        run: async () => {
-            const domain = document.getElementById('whois-input').value;
-            const resBox = document.getElementById('whois-result');
-            if (!domain) return;
-
-            resBox.style.display = 'block';
-            resBox.textContent = 'Interrogation du registre...';
-
-            try {
-                const res = await fetch(`${API_URL}/whois/${domain}`);
-                const data = await res.json();
-                resBox.textContent = data.data || JSON.stringify(data, null, 2);
-            } catch (e) {
-                resBox.textContent = 'Erreur lors de la récupération WHOIS.';
-            }
-        }
-    },
 
     // 3. EXIF
     exif: {
@@ -162,7 +143,7 @@ const tools = {
         }
     },
 
-    // 5. Compressor
+    // 5. Compressor (Images + PDF)
     compress: {
         run: async () => {
             const file = document.getElementById('compress-file').files[0];
@@ -170,28 +151,322 @@ const tools = {
 
             const resBox = document.getElementById('compress-result');
             resBox.style.display = 'block';
-            resBox.textContent = 'Compression en cours...';
+
+            // Get selected compression mode
+            const modeInput = document.querySelector('input[name="compress-mode"]:checked');
+            const mode = modeInput ? modeInput.value : 'balanced';
+
+            const modeLabels = {
+                'quality': 'QUALITÉ',
+                'balanced': 'ÉQUILIBRÉ',
+                'max': 'MAXIMUM'
+            };
+
+            const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+            const fileType = isPDF ? 'PDF' : 'IMAGE';
+
+            resBox.innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <div style="font-size:2rem; margin-bottom:10px;">⏳</div>
+                    <div>Compression ${fileType} en cours...</div>
+                    <div style="color:#666; font-size:0.8rem; margin-top:5px;">${file.name}</div>
+                    <div style="color:#00ff80; font-size:0.7rem; margin-top:8px;">Mode: ${modeLabels[mode]}</div>
+                </div>
+            `;
 
             try {
-                const options = { maxSizeMB: 1, useWebWorker: true };
-                const compressed = await imageCompression(file, options);
+                let compressed, url;
+                const originalSize = file.size;
 
-                const reduction = ((1 - compressed.size / file.size) * 100).toFixed(1);
-                const url = URL.createObjectURL(compressed);
+                if (isPDF) {
+                    // PDF Compression using pdf-lib
+                    const arrayBuffer = await file.arrayBuffer();
+                    const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+
+                    // Remove metadata to reduce size
+                    pdfDoc.setTitle('');
+                    pdfDoc.setAuthor('');
+                    pdfDoc.setSubject('');
+                    pdfDoc.setKeywords([]);
+                    pdfDoc.setProducer('AEGIS Compressor');
+                    pdfDoc.setCreator('');
+
+                    const compressedPdf = await pdfDoc.save({
+                        useObjectStreams: true,
+                        addDefaultPage: false,
+                        objectsPerTick: 50
+                    });
+
+                    compressed = new Blob([compressedPdf], { type: 'application/pdf' });
+                    url = URL.createObjectURL(compressed);
+                } else {
+                    // Image Compression with mode-specific options
+                    let options = {
+                        useWebWorker: true
+                    };
+
+                    switch (mode) {
+                        case 'quality':
+                            // Preserve quality - minimal compression
+                            options.maxSizeMB = 50; // Very high limit
+                            options.maxWidthOrHeight = undefined; // Keep original size
+                            options.initialQuality = 1; // No quality loss
+                            options.alwaysKeepResolution = true;
+                            break;
+                        case 'balanced':
+                            // Force medium compression
+                            options.maxSizeMB = 0.5;
+                            options.maxWidthOrHeight = 1600;
+                            options.initialQuality = 0.6;
+                            break;
+                        case 'max':
+                            // Force maximum compression
+                            options.maxSizeMB = 0.15;
+                            options.maxWidthOrHeight = 800;
+                            options.initialQuality = 0.4;
+                            break;
+                    }
+
+                    compressed = await imageCompression(file, options);
+                    url = URL.createObjectURL(compressed);
+                }
+
+                const newSize = compressed.size;
+                const reduction = ((1 - newSize / originalSize) * 100).toFixed(1);
+                const saved = originalSize - newSize;
+
+                // Format file sizes nicely
+                const formatSize = (bytes) => {
+                    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+                    return (bytes / 1024).toFixed(1) + ' KB';
+                };
+
+                // Determine reduction quality
+                let reductionColor = 'lime';
+                let reductionEmoji = '🎉';
+                if (reduction < 10) {
+                    reductionColor = '#888';
+                    reductionEmoji = '📊';
+                } else if (reduction < 30) {
+                    reductionColor = '#00ff80';
+                    reductionEmoji = '✅';
+                }
 
                 resBox.innerHTML = `
-                    <p>Original : ${(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                    <p style="color:#fff">Nouveau : ${(compressed.size / 1024 / 1024).toFixed(2)} MB (-${reduction}%)</p>
-                    <br>
-                    <a href="${url}" download="min_${file.name}" class="action-btn" style="text-decoration:none; display:inline-block; background:#fff; color:#000;">TÉLÉCHARGER</a>
+                    <div style="text-align:center;">
+                        <!-- Header -->
+                        <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">
+                            COMPRESSION ${fileType} TERMINÉE
+                        </div>
+                        
+                        <!-- Stats Grid -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:15px; margin-bottom:20px;">
+                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333;">
+                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">ORIGINAL</div>
+                                <div style="color:#fff; font-size:1.2rem; font-weight:bold;">${formatSize(originalSize)}</div>
+                            </div>
+                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid #333;">
+                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">COMPRESSÉ</div>
+                                <div style="color:#00ff80; font-size:1.2rem; font-weight:bold;">${formatSize(newSize)}</div>
+                            </div>
+                            <div style="background:#111; padding:15px; border-radius:8px; border:1px solid ${reductionColor};">
+                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">RÉDUCTION</div>
+                                <div style="color:${reductionColor}; font-size:1.2rem; font-weight:bold;">${reductionEmoji} -${reduction}%</div>
+                            </div>
+                        </div>
+                        
+                        <!-- File info -->
+                        <div style="color:#666; font-size:0.8rem; margin-bottom:15px;">
+                            ${file.name} → ${saved > 0 ? formatSize(saved) + ' économisés' : 'Fichier déjà optimisé'}
+                        </div>
+                        
+                        <!-- Download Button -->
+                        <a href="${url}" download="compressed_${file.name}" class="action-btn" 
+                           style="text-decoration:none; display:inline-block; background:#00ff80; color:#000; padding:12px 30px;">
+                            📥 TÉLÉCHARGER
+                        </a>
+                    </div>
                 `;
+                // Reset file input to allow reselection
+                document.getElementById('compress-file').value = '';
             } catch (e) {
-                resBox.textContent = 'Erreur: ' + e.message;
+                console.error('Compression error:', e);
+                resBox.innerHTML = `
+                    <div style="text-align:center; color:red;">
+                        <div style="font-size:2rem; margin-bottom:10px;">❌</div>
+                        <div>Erreur de compression</div>
+                `;
+                document.getElementById('compress-file').value = '';
             }
         }
     },
 
-    // 6. File Scanner
+    // 6. Image Converter
+    converter: {
+        run: async () => {
+            const file = document.getElementById('convert-file').files[0];
+            if (!file) return;
+
+            const resBox = document.getElementById('convert-result');
+            resBox.style.display = 'block';
+
+            // Get selected format
+            const formatInput = document.querySelector('input[name="convert-format"]:checked');
+            const format = formatInput ? formatInput.value : 'jpeg';
+            const quality = 1; // Always 100% quality
+
+            const formatNames = {
+                'png': 'PNG',
+                'jpeg': 'JPG',
+                'webp': 'WEBP',
+                'gif': 'GIF',
+                'bmp': 'BMP',
+                'svg': 'SVG',
+                'ico': 'ICO'
+            };
+
+            const formatExtensions = {
+                'png': 'png',
+                'jpeg': 'jpg',
+                'webp': 'webp',
+                'gif': 'gif',
+                'bmp': 'bmp',
+                'svg': 'svg',
+                'ico': 'ico'
+            };
+
+            resBox.innerHTML = `
+                <div style="text-align:center; padding:20px;">
+                    <div style="font-size:2rem; margin-bottom:10px;">🔄</div>
+                    <div>Conversion en ${formatNames[format]} en cours...</div>
+                    <div style="color:#666; font-size:0.8rem; margin-top:5px;">${file.name}</div>
+                </div>
+            `;
+
+            try {
+                // Load image
+                const img = new Image();
+                const loadPromise = new Promise((resolve, reject) => {
+                    img.onload = resolve;
+                    img.onerror = () => reject(new Error('Impossible de charger l\'image'));
+                });
+                img.src = URL.createObjectURL(file);
+                await loadPromise;
+
+                // Create canvas
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+
+                // For ICO, resize to 256x256 max
+                if (format === 'ico') {
+                    const size = Math.min(img.width, img.height, 256);
+                    canvas.width = size;
+                    canvas.height = size;
+                    ctx.drawImage(img, 0, 0, size, size);
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                }
+
+                let blob, url;
+
+                // Special handling for SVG (embed image as base64)
+                if (format === 'svg') {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const svgContent = `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${canvas.width}" height="${canvas.height}">
+  <image width="${canvas.width}" height="${canvas.height}" xlink:href="${dataUrl}"/>
+</svg>`;
+                    blob = new Blob([svgContent], { type: 'image/svg+xml' });
+                    url = URL.createObjectURL(blob);
+                } else {
+                    // Convert to blob for other formats
+                    let mimeType = `image/${format}`;
+                    if (format === 'ico') mimeType = 'image/png';
+                    if (format === 'bmp') mimeType = 'image/bmp';
+
+                    blob = await new Promise((resolve) => {
+                        if (format === 'png' || format === 'gif' || format === 'bmp' || format === 'ico') {
+                            canvas.toBlob(resolve, mimeType);
+                        } else {
+                            canvas.toBlob(resolve, mimeType, quality);
+                        }
+                    });
+
+                    if (!blob) {
+                        throw new Error('Échec de la conversion');
+                    }
+                    url = URL.createObjectURL(blob);
+                }
+
+                const originalSize = file.size;
+                const newSize = blob.size;
+
+                // Get original format
+                const originalFormat = file.type.split('/')[1]?.toUpperCase() || 'UNKNOWN';
+
+                // Format sizes
+                const formatSize = (bytes) => {
+                    if (bytes >= 1024 * 1024) return (bytes / 1024 / 1024).toFixed(2) + ' MB';
+                    return (bytes / 1024).toFixed(1) + ' KB';
+                };
+
+                // New filename
+                const baseName = file.name.replace(/\.[^/.]+$/, '');
+                const newFileName = `${baseName}.${formatExtensions[format]}`;
+
+                resBox.innerHTML = `
+                    <div style="text-align:center;">
+                        <!-- Header -->
+                        <div style="font-size:0.75rem; color:#666; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px;">
+                            ✅ CONVERSION TERMINÉE
+                        </div>
+                        
+                        <!-- Conversion Arrow -->
+                        <div style="display:flex; justify-content:center; align-items:center; gap:20px; margin-bottom:20px;">
+                            <div style="background:#111; padding:15px 25px; border-radius:8px; border:1px solid #333;">
+                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">FORMAT ORIGINAL</div>
+                                <div style="color:#fff; font-size:1.2rem; font-weight:bold;">${originalFormat}</div>
+                                <div style="color:#666; font-size:0.7rem; margin-top:5px;">${formatSize(originalSize)}</div>
+                            </div>
+                            <div style="color:#00ff80; font-size:1.5rem;">→</div>
+                            <div style="background:#111; padding:15px 25px; border-radius:8px; border:1px solid #00ff80;">
+                                <div style="color:#666; font-size:0.7rem; margin-bottom:5px;">NOUVEAU FORMAT</div>
+                                <div style="color:#00ff80; font-size:1.2rem; font-weight:bold;">${formatNames[format]}</div>
+                                <div style="color:#666; font-size:0.7rem; margin-top:5px;">${formatSize(newSize)}</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div style="margin-bottom:15px;">
+                            <img src="${url}" style="max-width:200px; max-height:150px; border-radius:8px; border:1px solid #333;">
+                        </div>
+                        
+                        <!-- Download Button -->
+                        <a href="${url}" download="${newFileName}" class="action-btn" 
+                           style="text-decoration:none; display:inline-block; background:#00ff80; color:#000; padding:12px 30px;">
+                            📥 TÉLÉCHARGER ${formatNames[format]}
+                        </a>
+                    </div>
+                `;
+                // Reset file input to allow reselection
+                document.getElementById('convert-file').value = '';
+            } catch (e) {
+                console.error('Conversion error:', e);
+                resBox.innerHTML = `
+                    <div style="text-align:center; color:red;">
+                        <div style="font-size:2rem; margin-bottom:10px;">❌</div>
+                        <div>Erreur de conversion</div>
+                        <div style="color:#666; font-size:0.8rem; margin-top:5px;">${e.message}</div>
+                    </div>
+                `;
+                document.getElementById('convert-file').value = '';
+            }
+        }
+    },
+
+    // 7. File Scanner
     scanner: {
         run: async (input) => {
             const file = input.files[0];
@@ -460,6 +735,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Safety Init
+        if (input.checked && input.closest('.check-label')) {
+            input.closest('.check-label').classList.add('checked');
+        }
+    });
+
+    // 2. Radio buttons (for compression mode)
+    document.querySelectorAll('.check-label input[type="radio"]').forEach(input => {
+        input.addEventListener('change', function () {
+            // Remove checked class from all radios in the same group
+            const name = this.name;
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radio => {
+                const label = radio.closest('.check-label');
+                if (label) label.classList.remove('checked');
+            });
+            // Add checked to selected
+            const label = this.closest('.check-label');
+            if (label && this.checked) label.classList.add('checked');
+        });
+
+        // Init state
         if (input.checked && input.closest('.check-label')) {
             input.closest('.check-label').classList.add('checked');
         }

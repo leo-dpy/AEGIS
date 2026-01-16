@@ -444,12 +444,17 @@ button.action-btn:active {
     padding: 0 5px;
 }
 
-/* Hide terminal output label for QR code */
-#qr-result::before {
+/* Hide terminal output label for QR code, compression, converter and URL results */
+#qr-result::before,
+#compress-result::before,
+#convert-result::before,
+#url-result::before {
     display: none;
 }
 
-#qr-result {
+#qr-result,
+#compress-result,
+#convert-result {
     border-left: none;
     border-radius: 8px;
 }

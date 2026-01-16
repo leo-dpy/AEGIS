@@ -13,6 +13,7 @@
     <script
         src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 </head>
 
 <body>
@@ -78,18 +79,7 @@
             </div>
         </section>
 
-        <!-- OUTIL 2: WHOIS -->
-        <section id="view-whois" class="view-section">
-            <h2>Information Domaine (WHOIS)</h2>
-            <div class="panel">
-                <p style="margin-bottom: 1rem;">Rechercher les informations d'enregistrement d'un nom de domaine.</p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="whois-input" placeholder="exemple.com">
-                    <button class="action-btn" onclick="tools.whois.run()">RECHERCHER</button>
-                </div>
-                <div id="whois-result" class="result-box" style="display:none;"></div>
-            </div>
-        </section>
+
 
         <!-- OUTIL 3: EXIF -->
         <section id="view-exif" class="view-section">
@@ -132,15 +122,120 @@
         <section id="view-compress" class="view-section">
             <h2>Compression Fichier</h2>
             <div class="panel">
-                <p>Réduisez la taille de vos images sans perte visible de qualité (Local execution).</p>
+                <p>Réduisez la taille de vos images et PDF (Traitement local).</p>
+
+                <!-- Compression Options -->
+                <div style="margin-bottom:1.5rem;">
+                    <div
+                        style="color:#888; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+                        MODE DE COMPRESSION
+                    </div>
+                    <div class="cyber-options" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
+                        <label class="check-label" id="compress-mode-quality">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="compress-mode" value="quality">
+                            <div style="text-align:center;">
+                                <div style="font-size:1.2rem;">🎨</div>
+                                <div>QUALITÉ</div>
+                                <div style="font-size:0.6rem; color:#666; margin-top:2px;">Légère réduction</div>
+                            </div>
+                        </label>
+                        <label class="check-label checked" id="compress-mode-balanced">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="compress-mode" value="balanced" checked>
+                            <div style="text-align:center;">
+                                <div style="font-size:1.2rem;">⚖️</div>
+                                <div>ÉQUILIBRÉ</div>
+                                <div style="font-size:0.6rem; color:#666; margin-top:2px;">Recommandé</div>
+                            </div>
+                        </label>
+                        <label class="check-label" id="compress-mode-max">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="compress-mode" value="max">
+                            <div style="text-align:center;">
+                                <div style="font-size:1.2rem;">📦</div>
+                                <div>MAXIMUM</div>
+                                <div style="font-size:0.6rem; color:#666; margin-top:2px;">Taille minimale</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
                 <label class="file-drop-zone" id="compress-drop">
-                    <div style="font-weight:700; color:#ddd;">CLIQUEZ POUR SÉLECTIONNER UNE IMAGE</div>
-                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP</div>
-                    <input type="file" id="compress-file" accept="image/*" onchange="tools.compress.run()">
+                    <div style="font-weight:700; color:#ddd;">📁 SÉLECTIONNER UN FICHIER</div>
+                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">Images (JPG, PNG, WEBP) • PDF</div>
+                    <input type="file" id="compress-file" accept="image/*,.pdf" onchange="tools.compress.run()">
                 </label>
 
                 <div id="compress-result" class="result-box" style="display:none;"></div>
+            </div>
+        </section>
+
+        <!-- OUTIL: CONVERTISSEUR D'IMAGES -->
+        <section id="view-converter" class="view-section">
+            <h2>Convertisseur d'Images</h2>
+            <div class="panel">
+                <p>Convertissez vos images dans différents formats (Traitement local).</p>
+
+                <!-- Format de sortie -->
+                <div style="margin-bottom:1.5rem;">
+                    <div
+                        style="color:#888; font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px;">
+                        FORMAT DE SORTIE
+                    </div>
+                    <div class="cyber-options" style="display:grid; grid-template-columns: repeat(4, 1fr); gap:8px;">
+                        <label class="check-label" id="convert-format-png">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="png">
+                            PNG
+                        </label>
+                        <label class="check-label checked" id="convert-format-jpg">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="jpeg" checked>
+                            JPG
+                        </label>
+                        <label class="check-label" id="convert-format-jpeg">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="jpeg">
+                            JPEG
+                        </label>
+                        <label class="check-label" id="convert-format-webp">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="webp">
+                            WEBP
+                        </label>
+                        <label class="check-label" id="convert-format-gif">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="gif">
+                            GIF
+                        </label>
+                        <label class="check-label" id="convert-format-bmp">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="bmp">
+                            BMP
+                        </label>
+                        <label class="check-label" id="convert-format-svg">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="svg">
+                            SVG
+                        </label>
+                        <label class="check-label" id="convert-format-ico">
+                            <div class="check-indicator"></div>
+                            <input type="radio" name="convert-format" value="ico">
+                            ICO
+                        </label>
+                    </div>
+                </div>
+
+
+                <label class="file-drop-zone" id="convert-drop">
+                    <div style="font-weight:700; color:#ddd;">🖼️ SÉLECTIONNER UNE IMAGE</div>
+                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP, GIF, BMP, SVG, TIFF,
+                        HEIC...</div>
+                    <input type="file" id="convert-file" accept="image/*" onchange="tools.converter.run()">
+                </label>
+
+                <div id="convert-result" class="result-box" style="display:none;"></div>
             </div>
         </section>
 
@@ -160,18 +255,7 @@
             </div>
         </section>
 
-        <!-- OUTIL 7: URL -->
-        <section id="view-url" class="view-section">
-            <h2>Inspecteur de Liens</h2>
-            <div class="panel">
-                <p style="margin-bottom: 1rem;">Analyse les redirections et la réputation des URL raccourcies.</p>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="url-input" placeholder="https://bit.ly/...">
-                    <button class="action-btn" onclick="tools.url.run()">INSPECTER</button>
-                </div>
-                <div id="url-result" class="result-box" style="display:none;"></div>
-            </div>
-        </section>
+
 
         <!-- OUTIL 8: PASS -->
         <!-- OUTIL 8: PASS -->
@@ -271,15 +355,14 @@
     <nav class="dock-container">
         <div class="dock-item active" onclick="app.navigate('dashboard')">ACCUEIL</div>
         <div class="dock-item" onclick="app.navigate('ip')">MON IP</div>
-        <div class="dock-item" onclick="app.navigate('whois')">WHOIS</div>
-        <div class="dock-item" onclick="app.navigate('url')">TEST LIEN</div>
         <div class="dock-item" onclick="app.navigate('pass')">MOTS DE PASSE</div>
         <div class="dock-item" onclick="app.navigate('qrcode')">QR CODE</div>
         <div class="dock-item" onclick="app.navigate('breach')">FUITE EMAIL</div>
         <div class="dock-item" onclick="app.navigate('exif')">PHOTO CLEAN</div>
         <div class="dock-item" onclick="app.navigate('sanitizer')">TEXTE CLEAN</div>
         <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>
-        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION FICHIER</div>
+        <div class="dock-item" onclick="app.navigate('compress')">COMPRESSION</div>
+        <div class="dock-item" onclick="app.navigate('converter')">CONVERTIR</div>
     </nav>
 
     <!-- Custom Popup -->
