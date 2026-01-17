@@ -42,24 +42,7 @@ Le système utilise une architecture hybride monolithique :
 ### Configuration de l'Environnement
 Configurez les variables d'environnement suivantes dans votre fichier `.env` ou les paramètres de votre conteneur :
 ```bash
-TotaVirus_API=votre_cle_api_virustotal
-PORT=3000
-```
 
-### Installation
-```bash
-# Cloner le dépôt
-git clone https://github.com/leodupuy/AEGIS.git
-
-# Naviguer dans le dossier serveur
-cd AEGIS/server
-
-# Installer les dépendances
-npm install
-
-# Démarrer l'application
-npm start
-```
 
 ### Déploiement Docker
 Le dépôt inclut un `Dockerfile` prêt pour la production.
@@ -70,9 +53,10 @@ docker run -p 3000:3000 --env-file .env aegis-toolkit
 
 ## Politique de Confidentialité
 AEGIS est conçu selon la philosophie "Privacy by Default".
-*   **Traitement Local** : La compression, la conversion, le hachage des fichiers et la génération de mots de passe s'effectuent strictement dans le navigateur du client. Les fichiers ne sont jamais transmis au serveur pour ces opérations.
-*   **Rétention Minimale des Données** : Le serveur agit strictement comme un proxy sans état pour les API externes d'intelligence des menaces. Aucun journal d'activité utilisateur ou de donnée analysée n'est persisté.
 
----
+***Traitement Local** : La compression, la conversion, le hachage des fichiers et la génération de mots de passe s'effectuent strictement dans le navigateur du client. Les fichiers ne sont jamais transmis au serveur pour ces opérations.
+
+***Rétention Minimale des Données** : Le serveur agit strictement comme un proxy sans état pour les API externes d'intelligence des menaces. Aucun journal d'activité utilisateur ou de donnée analysée n'est persisté.
+
 **Licence** : MIT
-**Mainteneur** : Léo Dupuy
+
