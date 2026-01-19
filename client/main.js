@@ -117,6 +117,22 @@ const tools = {
             const input = document.getElementById('san-input').value;
             let clean = input.replace(/[\u200B-\u200D\uFEFF]/g, '').normalize('NFKC');
             document.getElementById('san-output').value = clean;
+        },
+        copy: () => {
+            const txt = document.getElementById('san-output').value;
+            if (txt) {
+                navigator.clipboard.writeText(txt);
+                const btn = document.getElementById('san-copy-btn');
+                const original = btn.innerHTML;
+                btn.innerHTML = '✓'; 
+                btn.style.borderColor = 'lime';
+                btn.style.color = 'lime';
+                setTimeout(() => { 
+                    btn.innerHTML = original; 
+                    btn.style.borderColor = '#333';
+                    btn.style.color = '#ffffff'; 
+                }, 2000);
+            }
         }
     },
 

@@ -780,3 +780,22 @@ input[type=range]:focus {
         transform: translateX(5px);
     }
 }
+
+/* Custom Scrollbar for Textarea */
+textarea::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+textarea::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+textarea::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}

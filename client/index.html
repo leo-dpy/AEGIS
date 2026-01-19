@@ -142,8 +142,16 @@
                 <div style="display: grid; gap: 1rem;">
                     <textarea id="san-input" rows="6" placeholder="Collez votre texte suspect ici..."></textarea>
                     <button class="action-btn" onclick="tools.sanitizer.run()">NETTOYER LE TEXTE</button>
-                    <textarea id="san-output" rows="6" readonly
-                        placeholder="Le résultat propre apparaîtra ici..."></textarea>
+                    
+                    <div style="position:relative;">
+                        <textarea id="san-output" rows="6" readonly 
+                            placeholder="Le résultat propre apparaîtra ici..."
+                            style="padding-right: 50px;"></textarea>
+                        <button id="san-copy-btn" onclick="tools.sanitizer.copy()" title="Copier le texte"
+                            style="position:absolute; top: 10px; right: 10px; background:rgba(0,0,0,0.5); border:1px solid #333; border-radius:4px; color:#ffffff; font-size:1.2rem; cursor:pointer; padding:5px; transition:all 0.2s;">
+                            ⎘
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
