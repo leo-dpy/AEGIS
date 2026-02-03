@@ -164,11 +164,21 @@ const tools = {
                     compressed = new Blob([compressedPdf], { type: 'application/pdf' });
                     url = URL.createObjectURL(compressed);
                 } else {
-                    let options = { useWebWorker: true };
+                    // Configuration optimisée pour des performances type "iLovePDF"
+                    let options = { useWebWorker: true, fileType: file.type };
                     switch (mode) {
-                        case 'quality': options = { ...options, maxSizeMB: 50, initialQuality: 1, alwaysKeepResolution: true }; break;
-                        case 'balanced': options = { ...options, maxSizeMB: 0.5, maxWidthOrHeight: 1600, initialQuality: 0.6 }; break;
-                        case 'max': options = { ...options, maxSizeMB: 0.15, maxWidthOrHeight: 800, initialQuality: 0.4 }; break;
+                        case 'quality': 
+                            // Haute Qualité : On garde la résolution, compression légère (Qualité ~90%)
+                            options = { ...options, maxSizeMB: 10, initialQuality: 0.9, alwaysKeepResolution: true }; 
+                            break;
+                        case 'balanced': 
+                            // Équilibré : Standard Web (Max 1MB, HD 1920px max, Qualité ~75%)
+                            options = { ...options, maxSizeMB: 1, initialQuality: 0.75, maxWidthOrHeight: 1920 }; 
+                            break;
+                        case 'max': 
+                            // Maximum : Compression forte (Max 200KB, 1024px max, Qualité ~50%)
+                            options = { ...options, maxSizeMB: 0.2, initialQuality: 0.5, maxWidthOrHeight: 1024 }; 
+                            break;
                     }
                     compressed = await imageCompression(file, options);
                     url = URL.createObjectURL(compressed);

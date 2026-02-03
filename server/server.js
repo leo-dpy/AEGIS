@@ -48,8 +48,8 @@ app.get('/api/breach/:email', async (req, res) => {
         if (response.data && response.data.breaches) {
             return res.json(response.data.breaches.map(b => ({
                 Name: b[0] || 'Inconnu',
-                Description: 'Source détectée',
-                Date: 'Inconnue'
+                Description: b[6] || 'Source détectée',
+                BreachDate: b[3] || 'Inconnue'
             })));
         }
         res.json([]);
