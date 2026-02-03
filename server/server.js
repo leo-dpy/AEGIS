@@ -25,6 +25,28 @@ app.use(express.static(CLIENT_PATH));
 // Clé API VirusTotal (Env ou Fallback)
 const VIRUSTOTAL_API_KEY = process.env.TotaVirus_API || process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key';
 
+// Cache pour les détails des fuites
+let breachCache = [];
+const fetchBreaches = async () => {
+    try {
+        console.log('[INFO] Fetching global breach database...');
+        const response = await axios.get('https://api.xposedornot.com/v1/breaches', {
+            headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
+        });
+        if (response.data && response.data.exposedBreaches) {
+            breachCache = response.data.exposedBreaches;
+        } else if (Array.isArray(response.data)) {
+            breachCache = response.data;
+        }
+        console.log(`[INFO] Loaded ${breachCache.length} breaches into cache.`);
+    } catch (e) {
+        console.error('[ERROR] Failed to load breaches:', e.message);
+    }
+};
+
+// Charge la base de données des fuites au démarrage
+fetchBreaches();
+
 // --- API ROUTES ---
 
 // Route : Analyse de fichier via VirusTotal
@@ -44,16 +66,31 @@ app.get('/api/virustotal/:hash', async (req, res) => {
 // Route : Vérification de fuite d'email (XposedOrNot)
 app.get('/api/breach/:email', async (req, res) => {
     try {
-        const response = await axios.get(`https://api.xposedornot.com/v1/check-email/${req.params.email}`, { timeout: 10000 });
-        if (response.data && response.data.breaches) {
-            return res.json(response.data.breaches.map(b => ({
-                Name: b[0] || 'Inconnu',
-                Description: b[6] || 'Source détectée',
-                BreachDate: b[3] || 'Inconnue'
-            })));
+        const response = await axios.get(`https://api.xposedornot.com/v1/check-email/${req.params.email}`, {
+            timeout: 10000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+        });
+
+        // L'API renvoie { breaches: [ ["Name1", "Name2", ...] ] }
+        let breachNames = [];
+        if (response.data && response.data.breaches && response.data.breaches[0]) {
+            breachNames = response.data.breaches[0];
         }
-        res.json([]);
+
+        const details = breachNames.map(name => {
+            const info = breachCache.find(b => b.breachID === name);
+            return {
+                Name: name,
+                Description: info ? info.exposureDescription : 'Source détectée (Détails non disponibles)',
+                BreachDate: info ? info.breachedDate.split('T')[0] : 'Inconnue'
+            };
+        });
+
+        res.json(details);
     } catch (e) {
+        // En cas d'erreur ou si l'email n'est pas trouvé (l'API renvoie parfois 404 ou une erreur JSON)
         res.json([]);
     }
 });
