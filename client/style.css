@@ -1,16 +1,14 @@
 :root {
-    --bg-dark: #0f172a;
-    --bg-panel: #1e293b;
-    --text-main: #f8fafc;
-    --text-dim: #94a3b8;
-    --border-color: #334155;
-    /* Accent Blue-Tech (Professional Tool) */
-    --accent: #3b82f6;
-    --accent-secondary: #2563eb;
-    --accent-light: #60a5fa;
+    --bg-dark: #050505;
+    --bg-panel: #0a0a0a;
+    --text-main: #ffffff;
+    --text-dim: #888888;
+    --border-color: #333333;
+    /* Cyber White */
+    --accent: #ffffff;
 
-    --dock-bg: rgba(30, 41, 59, 0.9);
-    --dock-border: rgba(59, 130, 246, 0.2);
+    --dock-bg: rgba(10, 10, 10, 0.8);
+    --dock-border: rgba(255, 255, 255, 0.1);
 
     --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
@@ -23,7 +21,13 @@
 
 /* Modern Background & Layout */
 body {
-    background: linear-gradient(135deg, #0f172a 0%, #172033 50%, #1e293b 100%);
+    background-color: var(--bg-dark);
+    /* Grid Pattern */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+
     color: var(--text-main);
     font-family: var(--font-main);
     height: 100vh;
@@ -47,19 +51,15 @@ header {
     font-size: 1.2rem;
     letter-spacing: 2px;
     text-transform: uppercase;
-    background: linear-gradient(135deg, var(--accent), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .status-badge {
     font-size: 0.8rem;
     color: var(--text-dim);
-    border: 1px solid var(--accent);
+    border: 1px solid var(--border-color);
     padding: 0.2rem 0.6rem;
     border-radius: 4px;
-    background: rgba(236, 72, 153, 0.1);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 /* Zone Principale */
@@ -97,8 +97,11 @@ header {
     width: 200px;
     height: 200px;
     border-radius: 50%;
-    border: 1px solid rgba(236, 72, 153, 0.2);
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+    position: relative;
+    margin-bottom: 3rem;
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -160,26 +163,25 @@ header {
 }
 
 .stat-card {
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.05));
+    background: rgba(20, 20, 20, 0.6);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(236, 72, 153, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.05);
     padding: 1.5rem 2rem;
     border-radius: 12px;
     min-width: 200px;
     text-align: left;
-    transition: all 0.3s;
+    transition: transform 0.2s;
 }
 
 .stat-card:hover {
     transform: translateY(-5px);
-    border-color: var(--accent);
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .stat-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--accent);
+    color: #fff;
     margin-top: 0.5rem;
 }
 
@@ -204,12 +206,10 @@ h2 {
     margin-bottom: 2rem;
     text-transform: uppercase;
     letter-spacing: 2px;
-    border-left: 5px solid var(--accent);
+    border-left: 5px solid #ffffff;
     padding-left: 1.5rem;
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #fff;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     display: inline-block;
     position: relative;
     overflow: hidden;
@@ -223,7 +223,7 @@ h2::after {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(236, 72, 153, 0.2), transparent);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
     animation: shine 3s infinite;
 }
 
@@ -242,7 +242,7 @@ h2::after {
 }
 
 p {
-    color: var(--text-dim);
+    color: #aaa;
     line-height: 1.7;
     margin-bottom: 1.5rem;
     font-size: 1.05rem;
@@ -277,15 +277,15 @@ p {
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--dock-bg);
+    background: rgba(10, 10, 10, 0.85);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid var(--dock-border);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 0.6rem;
     display: flex;
     gap: 0.5rem;
-    box-shadow: 0 20px 50px rgba(236, 72, 153, 0.1);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
     z-index: 1000;
     max-width: 95%;
     overflow-x: auto;
@@ -308,7 +308,7 @@ p {
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    color: var(--text-dim);
+    color: #888;
     font-size: 0.8rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -318,36 +318,35 @@ p {
 }
 
 .dock-item:hover {
-    background: rgba(236, 72, 153, 0.1);
-    color: var(--accent);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
     transform: translateY(-2px);
-    border-color: rgba(236, 72, 153, 0.3);
+    border-color: rgba(255, 255, 255, 0.1);
 }
 
 .dock-item.active {
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
-    color: #fff;
-    box-shadow: 0 0 25px rgba(236, 72, 153, 0.4);
+    background: #fff;
+    color: #000;
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.3);
     font-weight: 800;
     transform: scale(1.05);
 }
 
 /* TOOL PANELS (CYBER UPGRADE) */
 .panel {
-    background: rgba(26, 17, 39, 0.6);
+    background: rgba(10, 10, 10, 0.7);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(236, 72, 153, 0.2);
+    border: 1px solid rgba(50, 50, 50, 0.5);
     border-radius: 12px;
     padding: 2.5rem;
-    box-shadow: 0 10px 40px rgba(236, 72, 153, 0.1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
     position: relative;
     overflow: hidden;
-    transition: all 0.3s;
+    transition: border-color 0.3s;
 }
 
 .panel:hover {
-    border-color: var(--accent);
-    box-shadow: 0 10px 40px rgba(236, 72, 153, 0.2);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .panel::before {
@@ -357,7 +356,7 @@ p {
     left: 0;
     width: 100%;
     height: 2px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
     opacity: 0.5;
 }
 
@@ -365,9 +364,9 @@ p {
 input,
 textarea,
 select {
-    background: rgba(26, 17, 39, 0.5);
-    border: 1px solid rgba(236, 72, 153, 0.2);
-    color: var(--text-main);
+    background: #050505;
+    border: 1px solid #333;
+    color: #fff;
     padding: 1.2rem;
     border-radius: 6px;
     font-family: 'Inter', monospace;
@@ -375,24 +374,25 @@ select {
     width: 100%;
     margin-bottom: 1.5rem;
     transition: all 0.3s;
-    box-shadow: inset 0 2px 5px rgba(236, 72, 153, 0.05);
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 input:focus,
 textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 15px rgba(236, 72, 153, 0.2), inset 0 2px 5px rgba(236, 72, 153, 0.05);
+    border-color: #ffffff;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.15), inset 0 2px 5px rgba(0, 0, 0, 0.5);
     outline: none;
-    color: var(--text-main);
+    color: #ffffff;
 }
 
 /* ACTION BUTTONS */
+/* ACTION BUTTONS */
 .action-btn {
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
-    color: #fff;
+    background: #ffffff;
+    color: #000;
     border: none;
     padding: 1rem 2rem;
-    border-radius: 8px;
+    border-radius: 4px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -400,7 +400,7 @@ textarea:focus {
     transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
     width: auto;
     min-width: 200px;
-    clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, 100% 75%, 95% 100%, 0 100%);
 
     /* Anchor tag support */
     display: inline-flex;
@@ -412,9 +412,10 @@ textarea:focus {
 }
 
 .action-btn:hover {
+    background: #fff;
     transform: translateY(-3px) scale(1.02);
-    box-shadow: 0 0 30px rgba(236, 72, 153, 0.6);
-    color: #fff;
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    color: #000;
 }
 
 .action-btn:active {
@@ -430,17 +431,17 @@ textarea:focus {
     margin-bottom: 25px;
     text-align: center;
     font-weight: 800;
-    text-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
-    border-bottom: 1px solid rgba(236, 72, 153, 0.2);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     padding-bottom: 15px;
 }
 
 .result-file-info {
-    color: var(--text-dim);
+    color: #888;
     font-size: 0.9rem;
     margin-bottom: 25px;
     text-align: center;
-    background: rgba(236, 72, 153, 0.05);
+    background: rgba(255, 255, 255, 0.03);
     padding: 8px;
     border-radius: 4px;
     display: inline-block;
@@ -456,18 +457,18 @@ textarea:focus {
 
 /* RESULT BOXES (Integrated Copy) */
 .result-box {
-    background: rgba(26, 17, 39, 0.6);
-    border: 1px solid rgba(236, 72, 153, 0.2);
-    border-left: 3px solid var(--accent);
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid #222;
+    border-left: 3px solid #ffffff;
     padding: 2rem;
     border-radius: 0 8px 8px 0;
     font-family: 'Courier New', monospace;
     white-space: pre-wrap;
     margin-top: 2rem;
     font-size: 1.1rem;
-    color: var(--text-main);
+    color: #ccc;
     position: relative;
-    box-shadow: 0 10px 30px rgba(236, 72, 153, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     min-height: 80px;
     display: flex;
     /* Flex layout for copy integration */
@@ -481,8 +482,8 @@ textarea:focus {
     top: -10px;
     right: 10px;
     font-size: 0.6rem;
-    color: var(--text-dim);
-    background: var(--bg-dark);
+    color: #444;
+    background: #000;
     padding: 0 5px;
 }
 
@@ -517,23 +518,23 @@ textarea:focus {
 .file-drop-zone {
     display: block;
     width: 100%;
-    border: 2px dashed rgba(236, 72, 153, 0.3);
+    border: 2px dashed #333;
     border-radius: 8px;
     padding: 2.5rem;
     text-align: center;
-    color: var(--text-dim);
+    color: #666;
     cursor: pointer;
     transition: all 0.3s ease;
-    background: rgba(236, 72, 153, 0.05);
+    background: rgba(0, 0, 0, 0.3);
     position: relative;
     margin-bottom: 2rem;
 }
 
 .file-drop-zone:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(236, 72, 153, 0.1);
-    box-shadow: 0 0 20px rgba(236, 72, 153, 0.2);
+    border-color: #ffffff;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
 }
 
 .file-drop-zone input[type="file"] {
@@ -550,12 +551,12 @@ textarea:focus {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     display: block;
-    color: var(--text-dim);
+    color: #444;
     transition: color 0.3s;
 }
 
 .file-drop-zone:hover .file-icon {
-    color: var(--accent);
+    color: #ffffff;
 }
 
 /* CUSTOM RANGE SLIDER */
@@ -576,11 +577,11 @@ input[type=range]::-webkit-slider-thumb {
     height: 16px;
     width: 16px;
     border-radius: 50%;
-    background: var(--accent);
+    background: #ffffff;
     cursor: pointer;
     margin-top: -6px;
-    box-shadow: 0 0 15px var(--accent);
-    border: 2px solid var(--accent);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    border: 2px solid #fff;
     transition: transform 0.1s;
 }
 
@@ -591,7 +592,7 @@ input[type=range]::-webkit-slider-thumb:hover {
 input[type=range]::-webkit-slider-runnable-track {
     width: 100%;
     height: 4px;
-    background: rgba(236, 72, 153, 0.2);
+    background: #333;
     border-radius: 2px;
 }
 
@@ -611,19 +612,21 @@ input[type=range]:focus {
 .check-label {
     position: relative;
     cursor: pointer;
-    background: rgba(26, 17, 39, 0.5);
-    border: 1px solid rgba(236, 72, 153, 0.2);
+    background: #0a0a0a;
+    border: 1px solid #333;
     padding: 8px 4px;
     border-radius: 4px;
     text-align: center;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     font-weight: 700;
-    color: var(--text-dim);
+    color: #666;
     display: flex;
     flex-direction: row;
+    /* Changed to Row */
     align-items: center;
     justify-content: center;
     gap: 6px;
+    /* Increased gap slightly */
     user-select: none;
     font-size: 0.65rem;
     letter-spacing: 1px;
@@ -634,39 +637,40 @@ input[type=range]:focus {
 }
 
 .check-label:hover {
-    border-color: var(--accent);
-    color: var(--accent-light);
-    background: rgba(236, 72, 153, 0.1);
+    border-color: #666;
+    color: #aaa;
+    background: #111;
 }
 
 .check-label.checked {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: rgba(236, 72, 153, 0.1);
+    border-color: #ffffff;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Hide the old indicator square if still in HTML, or style it as a tiny light */
 .check-indicator {
     width: 6px;
     height: 6px;
-    background: var(--text-dim);
+    background: #444;
     border-radius: 50%;
     margin: 0;
+    /* No margin, use gap */
     transition: all 0.3s;
     border: none;
 }
 
 .check-label.checked .check-indicator {
-    background: var(--accent);
-    box-shadow: 0 0 10px var(--accent);
+    background: #ffffff;
+    box-shadow: 0 0 10px #ffffff;
     transform: scale(1.5);
 }
 
 /* Copy Button Integrated */
 .copy-icon-btn {
     background: transparent;
-    border: 1px solid rgba(236, 72, 153, 0.2);
-    color: var(--text-dim);
+    border: 1px solid #333;
+    color: #888;
     width: 32px;
     height: 32px;
     display: flex;
@@ -678,9 +682,9 @@ input[type=range]:focus {
 }
 
 .copy-icon-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    box-shadow: 0 0 10px rgba(236, 72, 153, 0.3);
+    border-color: #ffffff;
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 /* RESULT CARDS & STATS */
@@ -692,12 +696,12 @@ input[type=range]:focus {
 }
 
 .stat-box {
-    background: rgba(26, 17, 39, 0.5);
+    background: #111;
     padding: 15px;
     border-radius: 8px;
-    border: 1px solid rgba(236, 72, 153, 0.2);
+    border: 1px solid #333;
     text-align: center;
-    transition: all 0.3s;
+    transition: transform 0.2s;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -705,18 +709,17 @@ input[type=range]:focus {
 }
 
 .stat-box:hover {
-    border-color: var(--accent);
+    border-color: #555;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(236, 72, 153, 0.1);
 }
 
 .stat-box.highlight {
     border-color: var(--accent);
-    background: rgba(236, 72, 153, 0.1);
+    background: rgba(255, 255, 255, 0.05);
 }
 
 .stat-label-sm {
-    color: var(--text-dim);
+    color: #666;
     font-size: 0.7rem;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -724,7 +727,7 @@ input[type=range]:focus {
 }
 
 .stat-value-lg {
-    color: var(--accent);
+    color: #fff;
     font-size: 1.2rem;
     font-weight: 800;
 }
@@ -734,9 +737,9 @@ input[type=range]:focus {
     justify-content: center;
     margin: 20px 0;
     padding: 20px;
-    background: rgba(26, 17, 39, 0.5);
+    background: rgba(0, 0, 0, 0.5);
     border-radius: 8px;
-    border: 1px solid rgba(236, 72, 153, 0.2);
+    border: 1px solid #333;
     position: relative;
     overflow: hidden;
     backdrop-filter: blur(5px);
@@ -746,7 +749,7 @@ input[type=range]:focus {
     max-width: 100%;
     max-height: 300px;
     border-radius: 4px;
-    box-shadow: 0 5px 20px rgba(236, 72, 153, 0.2);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
 }
 
 .conversion-flow {
@@ -789,64 +792,10 @@ textarea::-webkit-scrollbar-track {
 }
 
 textarea::-webkit-scrollbar-thumb {
-    background: rgba(236, 72, 153, 0.3);
+    background: #333;
     border-radius: 3px;
 }
 
 textarea::-webkit-scrollbar-thumb:hover {
-    background: rgba(236, 72, 153, 0.5);
-}
-
-/* Additional utility styles */
-.grid-2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    margin: 2rem 0;
-}
-
-@media (max-width: 1024px) {
-    .grid-2 {
-        grid-template-columns: 1fr;
-    }
-}
-
-.flex-center {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.text-gradient {
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.glow-accent {
-    text-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
-    color: var(--accent);
-}
-
-.gradient-border {
-    position: relative;
-    padding: 2rem;
-}
-
-.gradient-border::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, var(--accent-secondary), var(--accent));
-    border-radius: 12px;
-    padding: 1px;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-    mask-composite: exclude;
-    opacity: 0.3;
-    pointer-events: none;
+    background: #555;
 }
