@@ -18,10 +18,10 @@ const app = {
     // Initialisation du widget dashboard
     initDashboard: async () => {
         try {
-            const res = await fetch('/api/ip');
+            const res = await fetch('https://ipwho.is/');
             const data = await res.json();
             const dashIp = document.getElementById('dash-ip');
-            if (dashIp) dashIp.textContent = data.ip;
+            if (dashIp && data.success) dashIp.textContent = data.ip;
         } catch (e) { /* echec silencieux */ }
     }
 };
@@ -37,13 +37,13 @@ const tools = {
             const container = document.getElementById('ip-results');
             container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse directe de VOTRE connexion...</div>';
             try {
-                const res = await fetch('/api/ip');
+                const res = await fetch('https://ipwho.is/');
                 const data = await res.json();
 
-                if (!data.success) throw new Error(data.message);
+                if (!data.success) throw new Error(data.message || 'Impossible de récupérer l\'IP');
 
                 const fields = [
-                    { label: 'VOTRE IP PUBLIQUE', value: data.ip },
+                    { label: 'VOTRE IP PUBLIQUE', value: data.ip, copy: true },
                     { label: 'Fournisseur (ISP)', value: data.connection.isp },
                     { label: 'Organisation', value: data.connection.org },
                     { label: 'Localisation', value: `${data.city}, ${data.country}` },
@@ -61,7 +61,8 @@ const tools = {
                     </div>
                 `).join('');
             } catch (e) {
-                container.innerHTML = '<div style="color:red">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
+                container.innerHTML = '<div style="color:red; text-align:center;">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
+                console.error(e);
             }
         }
     },
