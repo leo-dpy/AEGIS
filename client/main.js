@@ -1,5 +1,40 @@
 /* AEGIS Logic - JavaScript Vanilla */
 
+// État global pour les données partagées
+const state = {
+    ipData: null,
+    isFetchingIp: false
+};
+
+// Fonction partagée pour récupérer l'IP (avec cache)
+const fetchIpData = async () => {
+    if (state.ipData) return state.ipData;
+    if (state.isFetchingIp) {
+        // Si déjà en cours, attendre
+        return new Promise(resolve => {
+            const check = setInterval(() => {
+                if (state.ipData) { clearInterval(check); resolve(state.ipData); }
+                else if (!state.isFetchingIp) { clearInterval(check); resolve(null); } // Échec ou fin
+            }, 100);
+        });
+    }
+
+    state.isFetchingIp = true;
+    try {
+        const res = await fetch('https://ipwho.is/');
+        const data = await res.json();
+        if (data.success) {
+            state.ipData = data;
+            return data;
+        }
+    } catch (e) {
+        console.error("Erreur IP:", e);
+    } finally {
+        state.isFetchingIp = false;
+    }
+    return null;
+};
+
 // Gestion de la navigation et du dock
 const app = {
     navigate: (viewName) => {
@@ -17,12 +52,10 @@ const app = {
 
     // Initialisation du widget dashboard
     initDashboard: async () => {
-        try {
-            const res = await fetch('https://ipwho.is/');
-            const data = await res.json();
-            const dashIp = document.getElementById('dash-ip');
-            if (dashIp && data.success) dashIp.textContent = data.ip;
-        } catch (e) { /* echec silencieux */ }
+        const data = await fetchIpData();
+        const dashIp = document.getElementById('dash-ip');
+        if (dashIp && data && data.ip) dashIp.textContent = data.ip;
+        else if (dashIp) dashIp.textContent = "Non disponible";
     }
 };
 
@@ -35,35 +68,37 @@ const tools = {
     ip: {
         init: async () => {
             const container = document.getElementById('ip-results');
-            container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse directe de VOTRE connexion...</div>';
-            try {
-                const res = await fetch('https://ipwho.is/');
-                const data = await res.json();
 
-                if (!data.success) throw new Error(data.message || 'Impossible de récupérer l\'IP');
-
-                const fields = [
-                    { label: 'VOTRE IP PUBLIQUE', value: data.ip, copy: true },
-                    { label: 'Fournisseur (ISP)', value: data.connection.isp },
-                    { label: 'Organisation', value: data.connection.org },
-                    { label: 'Localisation', value: `${data.city}, ${data.country}` },
-                    { label: 'Système', value: navigator.platform },
-                    { label: 'Navigateur', value: navigator.userAgent.includes('Chrome') ? 'Chrome/Chromium' : 'Autre (Firefox/Safari)' },
-                ];
-
-                container.innerHTML = fields.map(f => `
-                    <div style="background:#000; padding:1.5rem; border:1px solid #333; border-radius:6px; position:relative;">
-                        <div style="color:#888; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">${f.label}</div>
-                        <div style="font-size:1.1rem; color:#fff; font-weight:600; word-break:break-all;">
-                            ${f.value || 'N/A'}
-                            ${f.copy ? `<button onclick="navigator.clipboard.writeText('${f.value}'); alert('IP Copiée !')" style="margin-left:10px; padding:4px 8px; font-size:0.7rem; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">COPIER</button>` : ''}
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) {
-                container.innerHTML = '<div style="color:red; text-align:center;">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
-                console.error(e);
+            // Si on a déjà les données, on affiche direct, sinon loading
+            if (!state.ipData) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse de VOTRE connexion en cours...</div>';
             }
+
+            const data = await fetchIpData();
+
+            if (!data) {
+                container.innerHTML = '<div style="color:red; text-align:center; grid-column: 1/-1;">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
+                return;
+            }
+
+            const fields = [
+                { label: 'VOTRE IP PUBLIQUE', value: data.ip, copy: true },
+                { label: 'Fournisseur (ISP)', value: data.connection.isp },
+                { label: 'Organisation', value: data.connection.org },
+                { label: 'Localisation', value: `${data.city}, ${data.country}` },
+                { label: 'Système', value: navigator.platform },
+                { label: 'Navigateur', value: navigator.userAgent.includes('Chrome') ? 'Chrome/Chromium' : 'Autre (Firefox/Safari)' },
+            ];
+
+            container.innerHTML = fields.map(f => `
+                <div style="background:#000; padding:1.5rem; border:1px solid #333; border-radius:6px; position:relative;">
+                    <div style="color:#888; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">${f.label}</div>
+                    <div style="font-size:1.1rem; color:#fff; font-weight:600; word-break:break-all;">
+                        ${f.value || 'N/A'}
+                        ${f.copy ? `<button onclick="navigator.clipboard.writeText('${f.value}'); alert('IP Copiée !')" style="margin-left:10px; padding:4px 8px; font-size:0.7rem; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">COPIER</button>` : ''}
+                    </div>
+                </div>
+            `).join('');
         }
     },
 
