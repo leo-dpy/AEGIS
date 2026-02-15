@@ -18,7 +18,7 @@ const app = {
     // Initialisation du widget dashboard
     initDashboard: async () => {
         try {
-            const res = await fetch('https://ipwho.is/');
+            const res = await fetch('/api/ip');
             const data = await res.json();
             const dashIp = document.getElementById('dash-ip');
             if (dashIp) dashIp.textContent = data.ip;
@@ -37,7 +37,7 @@ const tools = {
             const container = document.getElementById('ip-results');
             container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse directe de VOTRE connexion...</div>';
             try {
-                const res = await fetch('https://ipwho.is/');
+                const res = await fetch('/api/ip');
                 const data = await res.json();
 
                 if (!data.success) throw new Error(data.message);
@@ -124,13 +124,13 @@ const tools = {
                 navigator.clipboard.writeText(txt);
                 const btn = document.getElementById('san-copy-btn');
                 const original = btn.innerHTML;
-                btn.innerHTML = '✓'; 
+                btn.innerHTML = '✓';
                 btn.style.borderColor = 'lime';
                 btn.style.color = 'lime';
-                setTimeout(() => { 
-                    btn.innerHTML = original; 
+                setTimeout(() => {
+                    btn.innerHTML = original;
                     btn.style.borderColor = '#333';
-                    btn.style.color = '#ffffff'; 
+                    btn.style.color = '#ffffff';
                 }, 2000);
             }
         }
@@ -167,17 +167,17 @@ const tools = {
                     // Configuration optimisée pour des performances type "iLovePDF"
                     let options = { useWebWorker: true, fileType: file.type };
                     switch (mode) {
-                        case 'quality': 
+                        case 'quality':
                             // Haute Qualité : On garde la résolution, compression légère (Qualité ~90%)
-                            options = { ...options, maxSizeMB: 10, initialQuality: 0.9, alwaysKeepResolution: true }; 
+                            options = { ...options, maxSizeMB: 10, initialQuality: 0.9, alwaysKeepResolution: true };
                             break;
-                        case 'balanced': 
+                        case 'balanced':
                             // Équilibré : Standard Web (Max 1MB, HD 1920px max, Qualité ~75%)
-                            options = { ...options, maxSizeMB: 1, initialQuality: 0.75, maxWidthOrHeight: 1920 }; 
+                            options = { ...options, maxSizeMB: 1, initialQuality: 0.75, maxWidthOrHeight: 1920 };
                             break;
-                        case 'max': 
+                        case 'max':
                             // Maximum : Compression forte (Max 200KB, 1024px max, Qualité ~50%)
-                            options = { ...options, maxSizeMB: 0.2, initialQuality: 0.5, maxWidthOrHeight: 1024 }; 
+                            options = { ...options, maxSizeMB: 0.2, initialQuality: 0.5, maxWidthOrHeight: 1024 };
                             break;
                     }
                     compressed = await imageCompression(file, options);
