@@ -11,14 +11,15 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
+app.set('trust proxy', 1); // Faire confiance au premier proxy (Nginx/Apache)
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(morgan('dev'));
 app.use(express.json());
 
-// Serve Static Frontend
-// Explicitly resolve the path to the client directory
+// Servir le Frontend Statique
+// Résolution explicite du chemin vers le dossier client
 const CLIENT_PATH = path.resolve(__dirname, '../client');
-console.log(`[INFO] Serving static files from: ${CLIENT_PATH}`);
+console.log(`[INFO] Dossier client servi : ${CLIENT_PATH}`);
 
 app.use(express.static(CLIENT_PATH));
 
@@ -29,7 +30,7 @@ const VIRUSTOTAL_API_KEY = process.env.TotaVirus_API || process.env.VIRUSTOTAL_A
 let breachCache = [];
 const fetchBreaches = async () => {
     try {
-        console.log('[INFO] Fetching global breach database...');
+        console.log('[INFO] Récupération de la base de données des fuites...');
         const response = await axios.get('https://api.xposedornot.com/v1/breaches', {
             headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36' }
         });
@@ -38,16 +39,16 @@ const fetchBreaches = async () => {
         } else if (Array.isArray(response.data)) {
             breachCache = response.data;
         }
-        console.log(`[INFO] Loaded ${breachCache.length} breaches into cache.`);
+        console.log(`[INFO] ${breachCache.length} fuites chargées en cache.`);
     } catch (e) {
-        console.error('[ERROR] Failed to load breaches:', e.message);
+        console.error('[ERROR] Échec du chargement des fuites :', e.message);
     }
 };
 
 // Charge la base de données des fuites au démarrage
 fetchBreaches();
 
-// --- API ROUTES ---
+// --- ROUTES API ---
 
 // Route : Analyse de fichier via VirusTotal
 app.get('/api/virustotal/:hash', async (req, res) => {
@@ -58,7 +59,7 @@ app.get('/api/virustotal/:hash', async (req, res) => {
         res.json(response.data);
     } catch (e) {
         // En cas d'erreur ou de clé invalide, retourne des données factices pour la démo
-        // console.error("VT Error:", e.message);
+        // console.error("Erreur VT :", e.message);
         res.json({ data: { attributes: { last_analysis_stats: { malicious: 0, suspicious: 0, harmless: 100 }, meaningful_name: "demo_file.exe" } } });
     }
 });
@@ -128,27 +129,51 @@ app.get('/api/url-info', async (req, res) => {
     }
 });
 
-// Route : Récupération de l'IP (Server-side Proxy pour éviter les bloqueurs)
+// Route : Récupération de l'IP (Détecté côté serveur pour le client)
+// Route : Récupération de l'IP (Détecté côté serveur pour le client)
 app.get('/api/ip', async (req, res) => {
     try {
-        // On force la récupération de l'IP publique du SERVEUR en IPv4.
-        // Cela garantit une IPv4 même si le client se connecte en IPv6 localement.
-        const response = await axios.get('https://ipwho.is/', {
-            family: 4 // Force IPv4 (DNS resolution)
-        });
+        // Récupération de l'IP du client (Support Nginx/Reverse Proxy)
+        let clientIp = req.headers['x-client-ip'] || req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.ip || req.socket.remoteAddress;
 
-        if (!response.data.success) {
-            console.warn(`[WARN] ipwho.is returned failure:`, response.data.message);
+        // Nettoyage de l'IP (gestion du ::ffff: pour IPv6-mapped IPv4)
+        if (clientIp && clientIp.includes('::ffff:')) {
+            clientIp = clientIp.split('::ffff:')[1];
         }
-        res.json(response.data);
+
+        // Si plusieurs IPs (x-forwarded-for), on prend la première (client d'origine)
+        if (clientIp && clientIp.includes(',')) {
+            clientIp = clientIp.split(',')[0].trim();
+        }
+
+        console.log(`[INFO] IP Client détectée (Brut) : ${clientIp}`);
+
+        // Si l'IP est locale (::1 ou 127.0.0.1), on tente de récupérer l'IP publique via une API externe
+        // C'est utile pour le développement local ou si le serveur est hébergé chez soi sans proxy configuré
+        if (clientIp === '::1' || clientIp === '127.0.0.1') {
+            try {
+                console.log('[INFO] IP Locale détectée, récupération IP publique via ipify...');
+                const response = await axios.get('https://api.ipify.org?format=json');
+                if (response.data && response.data.ip) {
+                    clientIp = response.data.ip;
+                    console.log(`[INFO] IP Publique récupérée : ${clientIp}`);
+                }
+            } catch (extError) {
+                console.warn("[WARN] Impossible de récupérer l'IP publique via ipify :", extError.message);
+                // On garde l'IP locale si l'API échoue
+            }
+        }
+
+        // On renvoie juste l'IP
+        res.json({ success: true, ip: clientIp });
     } catch (e) {
-        console.error("IP Error:", e.message);
+        console.error("Erreur IP :", e.message);
         res.status(500).json({ success: false, message: "Impossible de récupérer l'IP" });
     }
 });
 
 // --- SPA FALLBACK ---
-// This must be AFTER all API routes
+// Doit être APRÈS toutes les routes API
 app.get('*', (req, res) => {
     res.sendFile(path.join(CLIENT_PATH, 'index.html'));
 });

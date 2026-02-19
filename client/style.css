@@ -4,7 +4,7 @@
     --text-main: #ffffff;
     --text-dim: #888888;
     --border-color: #333333;
-    /* Cyber White */
+    /* Blanc Cyber */
     --accent: #ffffff;
 
     --dock-bg: rgba(10, 10, 10, 0.8);
@@ -19,10 +19,10 @@
     padding: 0;
 }
 
-/* Modern Background & Layout */
+/* Arrière-plan et Mise en page Modernes */
 body {
     background-color: var(--bg-dark);
-    /* Grid Pattern */
+    /* Motif de Grille */
     background-image:
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
@@ -36,7 +36,7 @@ body {
     flex-direction: column;
 }
 
-/* Header Minimaliste */
+/* En-tête Minimaliste */
 header {
     padding: 1.5rem 2rem;
     background: transparent;
@@ -72,7 +72,7 @@ header {
     margin: 0 auto;
     width: 100%;
 
-    /* Hide scrollbar */
+    /* Masquer la barre de défilement */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -81,7 +81,7 @@ header {
     display: none;
 }
 
-/* DASHBOARD / HERO SECTION */
+/* TABLEAU DE BORD / SECTION HÉROS */
 .hero-section {
     display: flex;
     flex-direction: column;
@@ -92,7 +92,7 @@ header {
     min-height: 60vh;
 }
 
-/* RADAR ANIMATION */
+/* ANIMATION RADAR */
 .radar-container {
     width: 200px;
     height: 200px;
@@ -153,7 +153,7 @@ header {
     }
 }
 
-/* DASHBOARD STATS CARDS */
+/* CARTES DE STATISTIQUES DU TABLEAU DE BORD */
 .dashboard-stats {
     display: flex;
     gap: 2rem;
@@ -186,7 +186,7 @@ header {
     color: var(--text-dim);
 }
 
-/* Typography */
+/* Typographie */
 h1 {
     font-size: 2rem;
     font-weight: 700;
@@ -209,7 +209,7 @@ h2 {
     overflow: hidden;
 }
 
-/* Add a scanline effect to H2 on hover */
+/* Ajoute un effet scanline au H2 au survol */
 h2::after {
     content: '';
     position: absolute;
@@ -242,7 +242,7 @@ p {
     font-size: 1.05rem;
 }
 
-/* Views Animations */
+/* Animations des Vues */
 .view-section {
     display: none;
     animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -265,7 +265,7 @@ p {
     }
 }
 
-/* DOCK STYLES (PRESERVED & REFINED) */
+/* STYLES DU DOCK (PRÉSERVÉS ET RAFFINÉS) */
 .dock-container {
     position: fixed;
     bottom: 2rem;
@@ -283,7 +283,7 @@ p {
     z-index: 1000;
     max-width: 95%;
     overflow-x: auto;
-    /* Hide scrollbar */
+    /* Masquer la barre de défilement */
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -326,7 +326,7 @@ p {
     transform: scale(1.05);
 }
 
-/* TOOL PANELS (CYBER UPGRADE) */
+/* PANNEAUX OUTILS (MISE À NIVEAU CYBER) */
 .panel {
     background: rgba(10, 10, 10, 0.7);
     backdrop-filter: blur(20px);
@@ -350,7 +350,7 @@ p {
     opacity: 0.5;
 }
 
-/* FORMS & INPUTS */
+/* FORMULAIRES ET ENTRÉES */
 input,
 textarea,
 select {
@@ -384,8 +384,7 @@ textarea:focus {
     color: #ffffff;
 }
 
-/* ACTION BUTTONS */
-/* ACTION BUTTONS */
+/* BOUTONS D'ACTION */
 .action-btn {
     background: #ffffff;
     color: #000;
@@ -403,7 +402,7 @@ textarea:focus {
     position: relative;
     overflow: hidden;
 
-    /* Anchor tag support */
+    /* Support des balises d'ancrage */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -424,7 +423,7 @@ textarea:focus {
     box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
-/* Result Header & Text Styling */
+/* En-tête de Résultat & Style de Texte */
 .result-success-header {
     font-size: 0.85rem;
     color: var(--accent);
@@ -457,7 +456,7 @@ textarea:focus {
     animation: fadeUp 0.3s ease-out;
 }
 
-/* RESULT BOXES (Integrated Copy) */
+/* BOÎTES DE RÉSULTAT (Copie Intégrée) */
 .result-box {
     background: rgba(0, 0, 0, 0.8);
     border: 1px solid #222;
@@ -473,13 +472,13 @@ textarea:focus {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     min-height: 80px;
     display: flex;
-    /* Flex layout for copy integration */
+    /* Disposition Flex pour intégration copie */
     flex-direction: column;
     gap: 1rem;
 }
 
 .result-box::before {
-    content: 'TERMINAL OUTPUT';
+    content: 'SORTIE TERMINAL';
     position: absolute;
     top: -10px;
     right: 10px;
@@ -489,7 +488,7 @@ textarea:focus {
     padding: 0 5px;
 }
 
-/* Hide terminal output label for QR code, compression, converter and URL results */
+/* Masquer l'étiquette de sortie terminal pour QR code, compression, convertisseur et résultats URL */
 #qr-result::before,
 #compress-result::before,
 #convert-result::before,
@@ -516,7 +515,7 @@ textarea:focus {
     width: 100%;
 }
 
-/* CUSTOM FILE UPLOAD */
+/* TÉLÉCHARGEMENT DE FICHIER PERSONNALISÉ */
 .file-drop-zone {
     display: block;
     width: 100%;
@@ -568,7 +567,7 @@ textarea:focus {
     color: #ffffff;
 }
 
-/* CUSTOM RANGE SLIDER */
+/* CURSEUR DE PLAGE PERSONNALISÉ */
 input[type=range] {
     -webkit-appearance: none;
     appearance: none;
@@ -610,7 +609,7 @@ input[type=range]:focus {
     border: none;
 }
 
-/* TECH TOGGLE BUTTONS (Replacing checkbox style) */
+/* BOUTONS DE BASCULE TECH (Remplacement du style checkbox) */
 .cyber-options {
     display: flex;
     flex-wrap: wrap;
@@ -631,11 +630,11 @@ input[type=range]:focus {
     color: #666;
     display: flex;
     flex-direction: row;
-    /* Changed to Row */
+    /* Changé en Ligne */
     align-items: center;
     justify-content: center;
     gap: 6px;
-    /* Increased gap slightly */
+    /* Espace légèrement augmenté */
     user-select: none;
     font-size: 0.65rem;
     letter-spacing: 1px;
@@ -657,14 +656,14 @@ input[type=range]:focus {
     background: rgba(255, 255, 255, 0.05);
 }
 
-/* Hide the old indicator square if still in HTML, or style it as a tiny light */
+/* Masquer l'ancien carré indicateur s'il est encore dans le HTML, ou le styliser comme une petite lumière */
 .check-indicator {
     width: 6px;
     height: 6px;
     background: #444;
     border-radius: 50%;
     margin: 0;
-    /* No margin, use gap */
+    /* Pas de marge, utiliser gap */
     transition: all 0.3s;
     border: none;
 }
@@ -675,7 +674,7 @@ input[type=range]:focus {
     transform: scale(1.5);
 }
 
-/* Copy Button Integrated */
+/* Bouton de Copie Intégré */
 .copy-icon-btn {
     background: transparent;
     border: 1px solid #333;
@@ -696,7 +695,7 @@ input[type=range]:focus {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
-/* RESULT CARDS & STATS */
+/* CARTES DE RÉSULTAT ET STATS */
 .stat-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
@@ -784,7 +783,7 @@ input[type=range]:focus {
     }
 }
 
-/* Custom Scrollbar for Textarea */
+/* Barre de défilement personnalisée pour Textarea */
 textarea::-webkit-scrollbar {
     width: 6px;
     height: 6px;

@@ -21,8 +21,8 @@ const fetchIpData = async () => {
 
     state.isFetchingIp = true;
     try {
-        // Tentative 1 : Via notre serveur (Proxy IPv4)
-        console.log("Tentative 1: Proxy Serveur...");
+        // Tentative via notre serveur (Proxy IPv4)
+        console.log("Tentative récupération IP...");
         let res = await fetch('/api/ip');
         if (res.ok) {
             let data = await res.json();
@@ -31,36 +31,8 @@ const fetchIpData = async () => {
                 return data;
             }
         }
-        throw new Error('Proxy failed');
     } catch (e) {
-        console.warn("Proxy IP échoué, passage en mode Fallback IPv4...", e);
-        try {
-            // Tentative 2: Fallback IPv4 via ipify (API externe IPv4-only)
-            // On récupère d'abord l'IP, puis on demande les détails à ipwho.is
-            const ipRes = await fetch('https://api.ipify.org?format=json');
-            const ipData = await ipRes.json();
-            if (ipData.ip) {
-                const detailsRes = await fetch(`https://ipwho.is/${ipData.ip}`);
-                const data = await detailsRes.json();
-                if (data.success) {
-                    state.ipData = data;
-                    return data;
-                }
-            }
-        } catch (e2) {
-            console.warn("Fallback ipify échoué, tentative directe...", e2);
-            try {
-                // Tentative 3 : Directement vers l'API (Dernier recours, risque IPv6)
-                const res = await fetch('https://ipwho.is/');
-                const data = await res.json();
-                if (data.success) {
-                    state.ipData = data;
-                    return data;
-                }
-            } catch (e3) {
-                console.error("Erreur IP (Tout a échoué):", e3);
-            }
-        }
+        console.error("Erreur récupération IP:", e);
     } finally {
         state.isFetchingIp = false;
     }
@@ -96,28 +68,25 @@ setTimeout(app.initDashboard, 500);
 const API_URL = '/api';
 
 const tools = {
-    // Outil 1 : Analyse IP (Client-side)
+    // Outil 1 : Analyse IP
     ip: {
         init: async () => {
             const container = document.getElementById('ip-results');
 
-            // Si on a déjà les données, on affiche direct, sinon loading
+            // Si on a déjà les données, on affiche direct, sinon chargement
             if (!state.ipData) {
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse de VOTRE connexion en cours...</div>';
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse de votre connexion en cours...</div>';
             }
 
             const data = await fetchIpData();
 
             if (!data) {
-                container.innerHTML = '<div style="color:red; text-align:center; grid-column: 1/-1;">Impossible de récupérer les données IP (Bloqueur de pub ?).</div>';
+                container.innerHTML = '<div style="color:red; text-align:center; grid-column: 1/-1;">Impossible de récupérer les données IP.</div>';
                 return;
             }
 
             const fields = [
-                { label: 'VOTRE IP PUBLIQUE', value: data.ip },
-                { label: 'Fournisseur (ISP)', value: data.connection.isp },
-                { label: 'Organisation', value: data.connection.org },
-                { label: 'Localisation', value: `${data.city}, ${data.country}` },
+                { label: 'VOTRE IP PUBLIQUE', value: data.ip }, // Bouton copier retiré
                 { label: 'Système', value: navigator.platform },
                 { label: 'Navigateur', value: navigator.userAgent.includes('Chrome') ? 'Chrome/Chromium' : 'Autre (Firefox/Safari)' },
             ];
@@ -127,7 +96,6 @@ const tools = {
                     <div style="color:#888; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">${f.label}</div>
                     <div style="font-size:1.1rem; color:#fff; font-weight:600; word-break:break-all;">
                         ${f.value || 'N/A'}
-                        ${f.copy ? `<button onclick="navigator.clipboard.writeText('${f.value}'); alert('IP Copiée !')" style="margin-left:10px; padding:4px 8px; font-size:0.7rem; background:#333; color:#fff; border:none; border-radius:4px; cursor:pointer;">COPIER</button>` : ''}
                     </div>
                 </div>
             `).join('');
