@@ -21,14 +21,46 @@ const fetchIpData = async () => {
 
     state.isFetchingIp = true;
     try {
-        const res = await fetch('https://ipwho.is/');
-        const data = await res.json();
-        if (data.success) {
-            state.ipData = data;
-            return data;
+        // Tentative 1 : Via notre serveur (Proxy IPv4)
+        console.log("Tentative 1: Proxy Serveur...");
+        let res = await fetch('/api/ip');
+        if (res.ok) {
+            let data = await res.json();
+            if (data.success) {
+                state.ipData = data;
+                return data;
+            }
         }
+        throw new Error('Proxy failed');
     } catch (e) {
-        console.error("Erreur IP:", e);
+        console.warn("Proxy IP échoué, passage en mode Fallback IPv4...", e);
+        try {
+            // Tentative 2: Fallback IPv4 via ipify (API externe IPv4-only)
+            // On récupère d'abord l'IP, puis on demande les détails à ipwho.is
+            const ipRes = await fetch('https://api.ipify.org?format=json');
+            const ipData = await ipRes.json();
+            if (ipData.ip) {
+                const detailsRes = await fetch(`https://ipwho.is/${ipData.ip}`);
+                const data = await detailsRes.json();
+                if (data.success) {
+                    state.ipData = data;
+                    return data;
+                }
+            }
+        } catch (e2) {
+            console.warn("Fallback ipify échoué, tentative directe...", e2);
+            try {
+                // Tentative 3 : Directement vers l'API (Dernier recours, risque IPv6)
+                const res = await fetch('https://ipwho.is/');
+                const data = await res.json();
+                if (data.success) {
+                    state.ipData = data;
+                    return data;
+                }
+            } catch (e3) {
+                console.error("Erreur IP (Tout a échoué):", e3);
+            }
+        }
     } finally {
         state.isFetchingIp = false;
     }
@@ -82,7 +114,7 @@ const tools = {
             }
 
             const fields = [
-                { label: 'VOTRE IP PUBLIQUE', value: data.ip, copy: true },
+                { label: 'VOTRE IP PUBLIQUE', value: data.ip },
                 { label: 'Fournisseur (ISP)', value: data.connection.isp },
                 { label: 'Organisation', value: data.connection.org },
                 { label: 'Localisation', value: `${data.city}, ${data.country}` },

@@ -131,19 +131,15 @@ app.get('/api/url-info', async (req, res) => {
 // Route : Récupération de l'IP (Server-side Proxy pour éviter les bloqueurs)
 app.get('/api/ip', async (req, res) => {
     try {
-        // Tentative de récupération de l'IP du client (via headers ou socket)
-        let clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        
-        // Si localhost (::1), on utilise l'IP publique du serveur pour la démo
-        if (clientIp === '::1' || clientIp === '127.0.0.1') {
-            const response = await axios.get('https://ipwho.is/');
-            return res.json(response.data);
+        // On force la récupération de l'IP publique du SERVEUR en IPv4.
+        // Cela garantit une IPv4 même si le client se connecte en IPv6 localement.
+        const response = await axios.get('https://ipwho.is/', {
+            family: 4 // Force IPv4 (DNS resolution)
+        });
+
+        if (!response.data.success) {
+            console.warn(`[WARN] ipwho.is returned failure:`, response.data.message);
         }
-
-        // Nettoyage de l'IP (gérer le cas de multiples IPs dans x-forwarded-for)
-        if (clientIp.includes(',')) clientIp = clientIp.split(',')[0].trim();
-
-        const response = await axios.get(`https://ipwho.is/${clientIp}`);
         res.json(response.data);
     } catch (e) {
         console.error("IP Error:", e.message);
