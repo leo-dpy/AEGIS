@@ -4,6 +4,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const axios = require('axios');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -12,9 +13,24 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors());
 app.set('trust proxy', 1); // Faire confiance au premier proxy (Nginx/Apache)
-app.use(helmet({ contentSecurityPolicy: false }));
+app.use(helmet({ 
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+}));
 app.use(morgan('dev'));
 app.use(express.json());
+
+// Limiteur de requêtes (Protection DDoS / Bruteforce)
+const apiLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limite chaque IP à 100 requêtes par fenêtre
+    message: { error: 'Trop de requêtes depuis cette IP, veuillez réessayer après 15 minutes.' },
+    standardHeaders: true, 
+    legacyHeaders: false,
+});
+
+// Appliquer la limite uniquement aux requêtes API (Protéger cette partie)
+app.use('/api/', apiLimiter);
 
 // Servir le Frontend Statique
 // Résolution explicite du chemin vers le dossier client
