@@ -1,19 +1,29 @@
+# Stage 1: Build & Serve (Simple setup)
 FROM node:18-alpine
 
-# Set working directory to project root
+# Use production mode
+ENV NODE_ENV=production
+
+# Set working directory
 WORKDIR /app
 
-# Copy the entire project context
-COPY . .
+# Copy server package files first to leverage build cache
+COPY server/package*.json ./server/
 
-# Install server dependencies
-RUN cd server && npm install --production
+# Install only production dependencies
+WORKDIR /app/server
+RUN npm install --production
 
-# Switch to server directory to run the app
+# Move back to root and copy the rest of the application
+WORKDIR /app
+COPY server/ ./server/
+COPY client/ ./client/
+
+# Change context back to server to run
 WORKDIR /app/server
 
-# Expose port (Coolify uses 3000 by default)
+# Expose port 3000
 EXPOSE 3000
 
-# Start the server
+# Start application
 CMD ["node", "server.js"]
