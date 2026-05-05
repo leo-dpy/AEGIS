@@ -39,6 +39,62 @@ const fetchIpData = async () => {
     return null;
 };
 
+// Formate un nom de plateforme lisible.
+const formatPlatformName = (platform) => {
+    const value = String(platform || '').trim().toLowerCase();
+
+    if (!value) return '';
+    if (value === 'macos' || value === 'mac os' || value === 'macintosh') return 'macOS';
+    if (value === 'ios') return 'iOS';
+    if (value === 'android') return 'Android';
+    if (value === 'linux') return 'Linux';
+    if (value === 'cros') return 'ChromeOS';
+    if (value === 'windows' || value.startsWith('win')) return 'Windows';
+
+    return platform;
+};
+
+// Detecte le systeme avec les Client Hints quand disponibles.
+async function getSystemInfo() {
+    const highEntropyHints = ['platform', 'architecture', 'bitness', 'wow64'];
+
+    try {
+        if (navigator.userAgentData?.getHighEntropyValues) {
+            const uaData = await navigator.userAgentData.getHighEntropyValues(highEntropyHints);
+            const platform = formatPlatformName(uaData.platform);
+            const architecture = String(uaData.architecture || '').toLowerCase();
+            const bitness = String(uaData.bitness || '');
+
+            if (platform === 'Windows') {
+                const is64Bit = bitness === '64'
+                    || uaData.wow64 === true
+                    || /(x86_64|x64|amd64|arm64)/i.test(architecture)
+                    || (architecture.includes('x86') && bitness !== '32');
+
+                return is64Bit ? 'Windows 64-bit' : 'Windows 32-bit';
+            }
+
+            if (platform) return `${platform}${bitness ? ` ${bitness}-bit` : ''}`;
+        }
+    } catch (error) {
+        console.warn('Detection systeme moderne indisponible:', error);
+    }
+
+    const userAgent = navigator.userAgent || '';
+
+    // Fallback pour les navigateurs sans User-Agent Client Hints.
+    if (/windows|win32|win64|wow64/i.test(userAgent)) {
+        return /win64|x64|wow64|amd64/i.test(userAgent) ? 'Windows 64-bit' : 'Windows';
+    }
+    if (/android/i.test(userAgent)) return 'Android';
+    if (/iphone|ipad|ipod/i.test(userAgent)) return 'iOS';
+    if (/macintosh|mac os x/i.test(userAgent)) return 'macOS';
+    if (/linux/i.test(userAgent)) return /x86_64|x64|amd64|aarch64/i.test(userAgent) ? 'Linux 64-bit' : 'Linux';
+
+    // Dernier recours : navigator.platform peut etre imprecis.
+    return navigator.platform || 'Inconnu';
+}
+
 // Gestion de la navigation et du dock
 const app = {
     navigate: (viewName) => {
@@ -79,6 +135,7 @@ const tools = {
             }
 
             const data = await fetchIpData();
+            const systemInfo = await getSystemInfo();
 
             if (!data) {
                 container.innerHTML = '<div style="color:red; text-align:center; grid-column: 1/-1;">Impossible de récupérer les données IP.</div>';
@@ -87,7 +144,7 @@ const tools = {
 
             const fields = [
                 { label: 'VOTRE IP PUBLIQUE', value: data.ip }, // Bouton copier retiré
-                { label: 'Système', value: navigator.platform },
+                { label: 'Système', value: systemInfo },
                 { label: 'Navigateur', value: navigator.userAgent.includes('Chrome') ? 'Chrome/Chromium' : 'Autre (Firefox/Safari)' },
             ];
 
