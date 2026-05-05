@@ -283,6 +283,8 @@ p {
     z-index: 1000;
     max-width: 95%;
     overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
     /* Masquer la barre de défilement */
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -295,7 +297,7 @@ p {
 .dock-item {
     position: relative;
     height: 44px;
-    padding: 0 1.5rem;
+    padding: 0 1rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -303,12 +305,29 @@ p {
     cursor: pointer;
     transition: all 0.3s ease;
     color: #888;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
     white-space: nowrap;
     border: 1px solid transparent;
+    flex-shrink: 0;
+}
+
+@media (max-width: 1024px) {
+    .dock-container {
+        bottom: 1rem;
+        padding: 0.4rem;
+        gap: 0.25rem;
+        border-radius: 10px;
+        justify-content: flex-start;
+    }
+    
+    .dock-item {
+        padding: 0 0.75rem;
+        font-size: 0.7rem;
+        height: 38px;
+    }
 }
 
 .dock-item:hover {
