@@ -40,7 +40,7 @@ console.log(`[INFO] Dossier client servi : ${CLIENT_PATH}`);
 app.use(express.static(CLIENT_PATH));
 
 // Clé API VirusTotal (Env ou Fallback)
-const VIRUSTOTAL_API_KEY = process.env.TotaVirus_API || process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key';
+const VIRUSTOTAL_API_KEY = process.env.VIRUSTOTAL_API_KEY || 'mock_vt_key';
 
 // Cache pour les détails des fuites
 let breachCache = [];
