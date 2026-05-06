@@ -22,8 +22,8 @@ COPY client/ ./client/
 # Change context back to server to run
 WORKDIR /app/server
 
-# Expose port 3000
-EXPOSE 3000
+# Expose port 8080
+EXPOSE 8080
 
 # Start application
 CMD ["node", "server.js"]
