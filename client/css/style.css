@@ -86,26 +86,16 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Centrage vertical via les marges auto des enfants (pas justify-content: center) :
-       si l'écran est trop petit, le contenu déborde vers le bas et reste défilable,
-       au lieu de partir vers le haut sous l'en-tête et de couper le titre. */
+    /* Contenu aligné en haut (pas justify-content: center) : le centrage faisait déborder
+       le contenu vers le haut sous l'en-tête sur les petits écrans, et collait les cartes au dock. */
     justify-content: flex-start;
-    min-height: 100%;
     text-align: center;
-}
-
-.hero-section > :first-child {
-    margin-top: auto;
-}
-
-.hero-section > :last-child {
-    margin-bottom: auto;
 }
 
 .hero-title {
     font-size: clamp(1.5rem, 6vw, 2.5rem);
     letter-spacing: -1px;
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
     overflow-wrap: anywhere;
 }
 
@@ -173,8 +163,7 @@ header {
 /* CARTES DE STATISTIQUES DU TABLEAU DE BORD */
 .dashboard-stats {
     display: flex;
-    gap: 2rem;
-    margin-top: 2rem;
+    gap: 1.5rem;
     justify-content: center;
     flex-wrap: wrap;
 }
@@ -183,7 +172,7 @@ header {
     background: rgba(20, 20, 20, 0.6);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.05);
-    padding: 1.5rem 2rem;
+    padding: 1.1rem 1.75rem;
     border-radius: 12px;
     min-width: 200px;
     text-align: left;

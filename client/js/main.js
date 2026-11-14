@@ -17,39 +17,30 @@ const readApi = async (res) => {
 
 // État global pour les données partagées
 const state = {
-    ipData: null,
-    isFetchingIp: false
+    ipData: null
 };
 
-// Fonction partagée pour récupérer l'IP (avec cache)
+// Récupère l'IP publique du visiteur, en privilégiant l'IPv4.
+// Notre serveur voit l'adresse utilisée pour le joindre, souvent l'IPv6 quand elle existe.
+// api.ipify.org n'est joignable qu'en IPv4 : le navigateur est obligé d'y aller en IPv4,
+// donc la réponse est toujours l'IPv4 du visiteur.
 const fetchIpData = async () => {
     if (state.ipData) return state.ipData;
-    if (state.isFetchingIp) {
-        // Si déjà en cours, attendre
-        return new Promise(resolve => {
-            const check = setInterval(() => {
-                if (state.ipData) { clearInterval(check); resolve(state.ipData); }
-                else if (!state.isFetchingIp) { clearInterval(check); resolve(null); } // Échec ou fin
-            }, 100);
-        });
-    }
 
-    state.isFetchingIp = true;
     try {
-        // Tentative via notre serveur (Proxy IPv4)
-        console.log("Tentative récupération IP...");
-        let res = await fetch('/api/ip');
+        const res = await fetch('https://api.ipify.org?format=json', { signal: AbortSignal.timeout(4000) });
         if (res.ok) {
-            let data = await res.json();
-            if (data.success) {
-                state.ipData = data;
-                return data;
-            }
+            const data = await res.json();
+            if (data.ip) return (state.ipData = { ip: data.ip, version: 4 });
         }
+    } catch { /* pas d'IPv4, bloqueur de pub, réseau... */ }
+
+    // Repli : IP vue par notre serveur (IPv6 si le visiteur n'a pas d'IPv4)
+    try {
+        const data = await readApi(await fetch('/api/ip'));
+        if (data.success) return (state.ipData = { ip: data.ip, version: data.ip.includes(':') ? 6 : 4 });
     } catch (e) {
-        console.error("Erreur récupération IP:", e);
-    } finally {
-        state.isFetchingIp = false;
+        console.error('Erreur récupération IP:', e);
     }
     return null;
 };
@@ -170,6 +161,7 @@ const app = {
 
         const [data, os] = await Promise.all([fetchIpData(), getSystemInfo()]);
         document.getElementById('dash-ip').textContent = (data && data.ip) ? data.ip : 'Non disponible';
+        if (data) document.getElementById('dash-ip-label').textContent = `Votre IPv${data.version}`;
         document.getElementById('dash-os').textContent = os || 'Inconnu';
     }
 };

@@ -3,6 +3,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const axios = require('axios');
 const path = require('path');
+const fs = require('fs');
+const crypto = require('crypto');
 const { rateLimit, ipKeyGenerator } = require('express-rate-limit');
 require('dotenv').config();
 
@@ -70,7 +72,26 @@ app.use('/api/', apiLimiter);
 // Servir le Frontend Statique
 const CLIENT_PATH = path.resolve(__dirname, '../client');
 console.log(`[INFO] Dossier client servi : ${CLIENT_PATH}`);
-app.use(express.static(CLIENT_PATH));
+
+// Cache busting : on ajoute ?v=<empreinte> aux URL du JS et du CSS dans index.html.
+// Cloudflare et les navigateurs gardent ces fichiers en cache plusieurs heures ;
+// sans ça, après un déploiement, le nouveau HTML tournait avec l'ancien script.
+const readClient = (file) => fs.readFileSync(path.join(CLIENT_PATH, file));
+const ASSET_VERSION = crypto.createHash('sha256')
+    .update(readClient('js/main.js'))
+    .update(readClient('css/style.css'))
+    .digest('hex').slice(0, 10);
+const INDEX_HTML = readClient('index.html').toString('utf8')
+    .replace('href="css/style.css"', `href="css/style.css?v=${ASSET_VERSION}"`)
+    .replace('src="js/main.js"', `src="js/main.js?v=${ASSET_VERSION}"`);
+
+const sendIndex = (req, res) => {
+    res.set('Cache-Control', 'no-cache');
+    res.type('html').send(INDEX_HTML);
+};
+
+app.get(['/', '/index.html'], sendIndex);
+app.use(express.static(CLIENT_PATH, { index: false }));
 
 if (!VIRUSTOTAL_API_KEY) {
     console.warn('[WARN] VIRUSTOTAL_API_KEY absente : les analyses de fichier et d\'URL seront indisponibles.');
@@ -237,9 +258,7 @@ app.use('/api', (req, res) => {
 
 // --- SPA FALLBACK ---
 // Doit être APRÈS toutes les routes API
-app.get('*', (req, res) => {
-    res.sendFile(path.join(CLIENT_PATH, 'index.html'));
-});
+app.get('*', sendIndex);
 
 // Démarrage du serveur
 app.listen(PORT, () => {
