@@ -86,10 +86,27 @@ header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    height: 100%;
+    /* Centrage vertical via les marges auto des enfants (pas justify-content: center) :
+       si l'écran est trop petit, le contenu déborde vers le bas et reste défilable,
+       au lieu de partir vers le haut sous l'en-tête et de couper le titre. */
+    justify-content: flex-start;
+    min-height: 100%;
     text-align: center;
-    min-height: 60vh;
+}
+
+.hero-section > :first-child {
+    margin-top: auto;
+}
+
+.hero-section > :last-child {
+    margin-bottom: auto;
+}
+
+.hero-title {
+    font-size: clamp(1.5rem, 6vw, 2.5rem);
+    letter-spacing: -1px;
+    margin-bottom: 2rem;
+    overflow-wrap: anywhere;
 }
 
 /* ANIMATION RADAR */

@@ -150,26 +150,12 @@ const wrapPngInIco = (pngBlob, width, height) => {
     return new Blob([header.buffer, pngBlob], { type: 'image/x-icon' });
 };
 
-// Nom du navigateur (l'ordre compte : Edge et Opera contiennent aussi "Chrome")
-const getBrowserName = () => {
-    const ua = navigator.userAgent || '';
-    if (/Edg\//.test(ua)) return 'Microsoft Edge';
-    if (/OPR\//.test(ua)) return 'Opera';
-    if (/Firefox\//.test(ua)) return 'Firefox';
-    if (/Chrome\//.test(ua)) return 'Chrome / Chromium';
-    if (/Safari\//.test(ua)) return 'Safari';
-    return 'Inconnu';
-};
-
 // Gestion de la navigation et du dock
 const app = {
     navigate: (viewName) => {
         document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
         const target = document.getElementById(`view-${viewName}`);
-        if (target) {
-            target.classList.add('active');
-            if (viewName === 'ip') tools.ip.init();
-        }
+        if (target) target.classList.add('active');
 
         document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
         const btns = document.querySelectorAll(`.dock-item[onclick*="'${viewName}'"]`);
@@ -178,10 +164,13 @@ const app = {
 
     // Initialisation du widget dashboard
     initDashboard: async () => {
-        const data = await fetchIpData();
-        const dashIp = document.getElementById('dash-ip');
-        if (dashIp && data && data.ip) dashIp.textContent = data.ip;
-        else if (dashIp) dashIp.textContent = "Non disponible";
+        // Nombre d'outils = entrées du dock hors "Accueil"
+        const toolCount = document.querySelectorAll('.dock-item').length - 1;
+        document.getElementById('dash-tools').textContent = `${toolCount} Outils`;
+
+        const [data, os] = await Promise.all([fetchIpData(), getSystemInfo()]);
+        document.getElementById('dash-ip').textContent = (data && data.ip) ? data.ip : 'Non disponible';
+        document.getElementById('dash-os').textContent = os || 'Inconnu';
     }
 };
 
@@ -190,41 +179,6 @@ setTimeout(app.initDashboard, 500);
 const API_URL = '/api';
 
 const tools = {
-    // Outil 1 : Analyse IP
-    ip: {
-        init: async () => {
-            const container = document.getElementById('ip-results');
-
-            // Si on a déjà les données, on affiche direct, sinon chargement
-            if (!state.ipData) {
-                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center;">Analyse de votre connexion en cours...</div>';
-            }
-
-            const data = await fetchIpData();
-            const systemInfo = await getSystemInfo();
-
-            if (!data) {
-                container.innerHTML = '<div style="color:red; text-align:center; grid-column: 1/-1;">Impossible de récupérer les données IP.</div>';
-                return;
-            }
-
-            const fields = [
-                { label: data.local ? 'IP (RÉSEAU LOCAL)' : 'VOTRE IP PUBLIQUE', value: data.ip },
-                { label: 'Système', value: systemInfo },
-                { label: 'Navigateur', value: getBrowserName() },
-            ];
-
-            container.innerHTML = fields.map(f => `
-                <div style="background:#000; padding:1.5rem; border:1px solid #333; border-radius:6px; position:relative;">
-                    <div style="color:#888; font-size:0.75rem; text-transform:uppercase; margin-bottom:0.5rem;">${esc(f.label)}</div>
-                    <div style="font-size:1.1rem; color:#fff; font-weight:600; word-break:break-all;">
-                        ${esc(f.value || 'N/A')}
-                    </div>
-                </div>
-            `).join('');
-        }
-    },
-
     // Outil 2 : Nettoyeur EXIF
     exif: {
         currentFile: null,
