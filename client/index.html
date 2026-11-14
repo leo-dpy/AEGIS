@@ -395,7 +395,12 @@
     </div>
 
     <!-- BARRE DE NAVIGATION FLOTTANTE -->
-    <nav class="dock-container">
+    <nav class="dock-container" id="dock">
+        <button type="button" class="dock-toggle" aria-expanded="false" aria-controls="dock"
+            onclick="app.toggleMenu()">
+            <span>☰ <span id="dock-current">ACCUEIL</span></span>
+            <span class="dock-toggle-icon">▲</span>
+        </button>
         <div class="dock-item active" onclick="app.navigate('dashboard')">ACCUEIL</div>
         <div class="dock-item" onclick="app.navigate('url')">TEST URL</div>
         <div class="dock-item" onclick="app.navigate('scanner')">SCAN FICHIER</div>

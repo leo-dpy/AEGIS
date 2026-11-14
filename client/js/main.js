@@ -149,8 +149,29 @@ const app = {
         if (target) target.classList.add('active');
 
         document.querySelectorAll('.dock-item').forEach(el => el.classList.remove('active'));
-        const btns = document.querySelectorAll(`.dock-item[onclick*="'${viewName}'"]`);
-        if (btns.length > 0) btns[0].classList.add('active');
+        const btn = document.querySelector(`.dock-item[onclick*="'${viewName}'"]`);
+        if (btn) {
+            btn.classList.add('active');
+            document.getElementById('dock-current').textContent = btn.textContent;
+        }
+        app.toggleMenu(false);
+        document.getElementById('main-content').scrollTop = 0;
+    },
+
+    // Menu du dock sur téléphone (ouvert / fermé)
+    toggleMenu: (open) => {
+        const dock = document.getElementById('dock');
+        const isOpen = dock.classList.toggle('open', open);
+        dock.querySelector('.dock-toggle').setAttribute('aria-expanded', String(isOpen));
+    },
+
+    // Réserve en bas de page la place réellement occupée par le dock
+    // (il peut faire 1, 2 ou 3 lignes selon la largeur de l'écran)
+    updateDockSpace: () => {
+        const dock = document.getElementById('dock');
+        if (dock.classList.contains('open')) return; // le menu ouvert recouvre la page volontairement
+        const fromBottom = window.innerHeight - dock.getBoundingClientRect().top;
+        document.documentElement.style.setProperty('--dock-space', `${Math.ceil(fromBottom) + 24}px`);
     },
 
     // Initialisation du widget dashboard
@@ -636,6 +657,20 @@ window.tools = tools;
 
 // Listeners pour l'interface utilisateur
 document.addEventListener('DOMContentLoaded', () => {
+    // Dock : place réservée en bas de page, recalculée quand il change de taille
+    const dock = document.getElementById('dock');
+    new ResizeObserver(app.updateDockSpace).observe(dock);
+    window.addEventListener('resize', app.updateDockSpace);
+    app.updateDockSpace();
+
+    // Menu téléphone : se ferme en touchant ailleurs ou avec Échap
+    document.addEventListener('click', (e) => {
+        if (dock.classList.contains('open') && !dock.contains(e.target)) app.toggleMenu(false);
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') app.toggleMenu(false);
+    });
+
     document.querySelectorAll('.check-label input[type="checkbox"]').forEach(input => {
         input.addEventListener('change', function () {
             const label = this.closest('.check-label');
