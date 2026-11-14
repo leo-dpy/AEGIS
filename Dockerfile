@@ -12,7 +12,7 @@ COPY server/package*.json ./server/
 
 # Install only production dependencies
 WORKDIR /app/server
-RUN npm install --production
+RUN npm ci --omit=dev
 
 # Move back to root and copy the rest of the application
 WORKDIR /app
@@ -22,8 +22,12 @@ COPY client/ ./client/
 # Change context back to server to run
 WORKDIR /app/server
 
-# Expose port 80
-EXPOSE 80
+# Port d'écoute (surchargeable avec -e PORT=...)
+ENV PORT=3000
+EXPOSE 3000
+
+# Ne pas tourner en root dans le conteneur
+USER node
 
 # Start application
 CMD ["node", "server.js"]

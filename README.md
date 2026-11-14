@@ -42,14 +42,23 @@ Le système utilise une architecture hybride monolithique :
 ### Configuration de l'Environnement
 Configurez les variables d'environnement suivantes dans votre fichier `.env` ou les paramètres de votre conteneur :
 ```bash
-
+# Obligatoire pour l'analyse de fichiers et d'URL (sinon ces outils répondent "service non configuré")
+VIRUSTOTAL_API_KEY=votre_cle_virustotal
+# Optionnel (3000 par défaut)
+PORT=3000
+```
 
 ### Déploiement Docker
 Le dépôt inclut un `Dockerfile` prêt pour la production.
 ```bash
 docker build -t aegis-toolkit .
-docker run -p 3000:3000 --env-file .env aegis-toolkit
+docker run -d --name aegis -p 3000:3000 --env-file .env --restart unless-stopped aegis-toolkit
 ```
+
+### Derrière un tunnel Cloudflare
+Faites pointer le tunnel vers `http://<ip-du-conteneur>:3000`. L'IP réelle des visiteurs est lue dans
+l'en-tête `CF-Connecting-IP` : l'application ne doit donc être joignable **que** via le tunnel
+(ne publiez pas le port 3000 sur Internet), sinon cet en-tête pourrait être falsifié.
 
 ## Politique de Confidentialité
 AEGIS est conçu selon la philosophie "Privacy by Default".

@@ -13,7 +13,7 @@
     <!-- Police Pro 'Inter' -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <!-- Bibliothèques -->
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.js"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -153,7 +153,8 @@
                 <div style="display: grid; gap: 1rem;">
                     <textarea id="san-input" rows="6" placeholder="Collez votre texte suspect ici..."></textarea>
                     <button class="action-btn" onclick="tools.sanitizer.run()">NETTOYER LE TEXTE</button>
-                    
+                    <div id="san-info" style="font-size:0.85rem;"></div>
+
                     <div style="position:relative;">
                         <textarea id="san-output" rows="6" readonly 
                             placeholder="Le résultat propre apparaîtra ici..."
@@ -253,11 +254,6 @@
                             <input type="radio" name="convert-format" value="webp">
                             WEBP
                         </label>
-                        <label class="check-label" id="convert-format-gif">
-                            <div class="check-indicator"></div>
-                            <input type="radio" name="convert-format" value="gif">
-                            GIF
-                        </label>
                         <label class="check-label" id="convert-format-bmp">
                             <div class="check-indicator"></div>
                             <input type="radio" name="convert-format" value="bmp">
@@ -279,8 +275,8 @@
 
                 <label class="file-drop-zone" id="convert-drop">
                     <div style="font-weight:700; color:#ddd;">SÉLECTIONNER UNE IMAGE</div>
-                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP, GIF, BMP, SVG, TIFF,
-                        HEIC...</div>
+                    <div style="font-size:0.8rem; margin-top:0.5rem; color:#555;">JPG, PNG, WEBP, GIF, BMP, SVG, AVIF
+                        (selon le navigateur)</div>
                     <input type="file" id="convert-file" accept="image/*" onchange="tools.converter.run()">
                 </label>
 
@@ -395,10 +391,10 @@
 
         <!-- OUTIL : FUITE DE DONNÉES -->
         <section id="view-breach" class="view-section">
-            <h2>Radar de Fuites (HIBP)</h2>
+            <h2>Radar de Fuites</h2>
             <div class="panel">
-                <p style="margin-bottom: 1rem;">Vérifie si une adresse email a été compromise dans une base de données
-                    publique.</p>
+                <p style="margin-bottom: 1rem;">Vérifie si une adresse email apparaît dans une fuite de données
+                    publique (source : XposedOrNot).</p>
                 <div style="display: flex; gap: 10px;">
                     <input type="email" id="breach-input" placeholder="email@exemple.com">
                     <button class="action-btn" onclick="tools.breach.run()">VÉRIFIER</button>
